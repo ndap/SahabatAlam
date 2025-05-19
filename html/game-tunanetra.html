@@ -1,0 +1,787 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tunanetra Audio Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #1a1a1a;
+        }
+
+        /* White fade-out overlay */
+        .fade-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 1.5s ease-out;
+        }
+
+        .fade-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .content-group {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .content-image {
+            max-width: 90%;
+            max-height: 90vh;
+            height: auto;
+            width: auto;
+            object-fit: contain;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
+            cursor: pointer;
+        }
+
+        .content-image:hover {
+            transform: scale(1.02);
+            filter: drop-shadow(0 6px 25px rgba(0, 0, 0, 0.4));
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .content-image {
+                max-width: 95%;
+                max-height: 80vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-image {
+                max-width: 98%;
+                max-height: 70vh;
+            }
+        }
+
+        /* Loading state */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            z-index: 3;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .content-image.loading-hidden {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .content-image.loaded {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Audio controls UI */
+        .audio-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: flex;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .audio-controls.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .audio-btn {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .audio-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .audio-btn:active {
+            transform: translateY(0);
+        }
+
+        .audio-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Instructions overlay */
+        .instructions {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+            transition: all 0.3s ease;
+            max-width: 80%;
+        }
+
+        .instructions.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .instructions p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Screen reader friendly elements */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus indicators for accessibility */
+        .audio-btn:focus {
+            outline: 3px solid #fff;
+            outline-offset: 2px;
+        }
+
+        /* Animation for focus */
+        .content-image.focused {
+            animation: gentle-pulse 2s infinite;
+        }
+
+        @keyframes gentle-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Volume indicator */
+        .volume-indicator {
+            position: fixed;
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+            z-index: 4;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .volume-indicator.show {
+            opacity: 1;
+        }
+
+        .volume-bar {
+            width: 100px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .volume-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        /* Track info */
+        .track-info {
+            position: fixed;
+            top: 50%;
+            left: 30px;
+            transform: translateY(-50%);
+            z-index: 4;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            max-width: 250px;
+        }
+
+        .track-info.show {
+            opacity: 1;
+        }
+
+        .track-info h4 {
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .track-info p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Progress bar */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- White fade-out overlay -->
+    <div class="fade-overlay" id="fadeOverlay"></div>
+
+    <div class="container">
+        <!-- Background Image -->
+        <img src="../assets/Background/TunanetraBG.jpg" alt="Background" class="background-image" id="backgroundImg">
+        
+        <!-- Loading indicator -->
+        <div class="loading" id="loadingText">Loading...</div>
+        
+        <!-- Content Group (Mic, Headphones, Waveform, Text) -->
+        <div class="content-group">
+            <img src="../assets/Button/HeadSet.png" alt="Audio interface with headphones, microphone and sound waves" class="content-image loading-hidden" id="contentImg" tabindex="0">
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions" id="instructions">
+            <h3>Audio Experience</h3>
+            <p>Gunakan tombol di bawah untuk mengontrol audio. Tekan spasi untuk play/pause, panah kiri/kanan untuk navigasi.</p>
+        </div>
+
+        <!-- Audio Controls -->
+        <div class="audio-controls" id="audioControls">
+            <button class="audio-btn" id="playBtn" aria-label="Play audio">
+                <span class="sr-only">Play atau pause audio</span>
+                Play
+            </button>
+            <button class="audio-btn" id="prevBtn" aria-label="Previous track">
+                <span class="sr-only">Audio sebelumnya</span>
+                Previous
+            </button>
+            <button class="audio-btn" id="nextBtn" aria-label="Next track">
+                <span class="sr-only">Audio selanjutnya</span>
+                Next
+            </button>
+            <button class="audio-btn" id="repeatBtn" aria-label="Repeat audio">
+                <span class="sr-only">Ulangi audio</span>
+                Repeat
+            </button>
+            <button class="audio-btn" id="shuffleBtn" aria-label="Shuffle tracks">
+                <span class="sr-only">Acak audio</span>
+                Shuffle
+            </button>
+        </div>
+
+        <!-- Volume Indicator -->
+        <div class="volume-indicator" id="volumeIndicator">
+            <div>Volume: <span id="volumeText">70%</span></div>
+            <div class="volume-bar">
+                <div class="volume-fill" id="volumeFill" style="width: 70%;"></div>
+            </div>
+        </div>
+
+        <!-- Track Info -->
+        <div class="track-info" id="trackInfo">
+            <h4 id="trackTitle">No Track Selected</h4>
+            <p id="trackNumber">0 / 0</p>
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <p id="timeDisplay">0:00 / 0:00</p>
+        </div>
+    </div>
+
+    <!-- Audio elements -->
+    <audio id="audioPlayer" preload="auto">
+        <p>Browser Anda tidak mendukung audio player.</p>
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const fadeOverlay = document.getElementById('fadeOverlay');
+            const backgroundImg = document.getElementById('backgroundImg');
+            const contentImg = document.getElementById('contentImg');
+            const loadingText = document.getElementById('loadingText');
+            const instructions = document.getElementById('instructions');
+            const audioControls = document.getElementById('audioControls');
+            const volumeIndicator = document.getElementById('volumeIndicator');
+            const trackInfo = document.getElementById('trackInfo');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const volumeFill = document.getElementById('volumeFill');
+            const volumeText = document.getElementById('volumeText');
+            const progressBar = document.getElementById('progressBar');
+            const progressContainer = document.getElementById('progressContainer');
+            const trackTitle = document.getElementById('trackTitle');
+            const trackNumber = document.getElementById('trackNumber');
+            const timeDisplay = document.getElementById('timeDisplay');
+            
+            // Buttons
+            const playBtn = document.getElementById('playBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const repeatBtn = document.getElementById('repeatBtn');
+            const shuffleBtn = document.getElementById('shuffleBtn');
+            
+            // State
+            let backgroundLoaded = false;
+            let contentLoaded = false;
+            let isPlaying = false;
+            let currentVolume = 0.7;
+            let isRepeating = false;
+            let isShuffling = false;
+            let currentTrack = 0;
+            let duration = 0;
+            let currentTime = 0;
+            
+            // Sample audio tracks with demo URLs
+            const audioTracks = [
+                { 
+                    title: "Demo Track 1", 
+                    src: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
+                    artist: "Demo Artist"
+                },
+                { 
+                    title: "Demo Track 2", 
+                    src: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
+                    artist: "Demo Artist"
+                },
+                { 
+                    title: "Demo Track 3", 
+                    src: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav",
+                    artist: "Demo Artist"
+                }
+            ];
+
+            // Initialize fade-out animation
+            setTimeout(() => {
+                fadeOverlay.classList.add('fade-out');
+            }, 500);
+
+            // Remove overlay after animation
+            setTimeout(() => {
+                fadeOverlay.remove();
+            }, 2000);
+
+            // Initialize
+            audioPlayer.volume = currentVolume;
+            updateVolumeDisplay();
+            updateTrackInfo();
+
+            // Function to check if both images are loaded
+            function checkAllLoaded() {
+                if (backgroundLoaded && contentLoaded) {
+                    loadingText.style.display = 'none';
+                    contentImg.classList.remove('loading-hidden');
+                    contentImg.classList.add('loaded');
+                    
+                    // Show UI after loading
+                    setTimeout(() => {
+                        instructions.classList.add('show');
+                        audioControls.classList.add('show');
+                    }, 1000);
+                    
+                    // Hide instructions after 5 seconds
+                    setTimeout(() => {
+                        instructions.classList.remove('show');
+                    }, 6000);
+                }
+            }
+
+            // Image loading events
+            backgroundImg.addEventListener('load', function() {
+                backgroundLoaded = true;
+                checkAllLoaded();
+            });
+
+            contentImg.addEventListener('load', function() {
+                contentLoaded = true;
+                checkAllLoaded();
+            });
+
+            // Error handling for images
+            backgroundImg.addEventListener('error', function() {
+                console.log('Background image failed to load, using fallback');
+                backgroundLoaded = true;
+                checkAllLoaded();
+            });
+
+            contentImg.addEventListener('error', function() {
+                console.log('Content image failed to load, using fallback');
+                contentLoaded = true;
+                checkAllLoaded();
+            });
+
+            // Audio player functions
+            function playPause() {
+                try {
+                    if (isPlaying) {
+                        audioPlayer.pause();
+                        playBtn.textContent = 'Play';
+                        playBtn.classList.remove('active');
+                        contentImg.classList.remove('focused');
+                    } else {
+                        if (audioTracks.length > 0 && (!audioPlayer.src || audioPlayer.src === '')) {
+                            loadTrack(currentTrack);
+                        }
+                        const playPromise = audioPlayer.play();
+                        
+                        if (playPromise !== undefined) {
+                            playPromise.then(() => {
+                                playBtn.textContent = 'Pause';
+                                playBtn.classList.add('active');
+                                contentImg.classList.add('focused');
+                                showTrackInfo();
+                            }).catch(error => {
+                                console.log('Playback failed:', error);
+                                announceToScreenReader('Audio gagal diputar');
+                            });
+                        }
+                    }
+                    isPlaying = !isPlaying;
+                    
+                    // Announce to screen readers
+                    announceToScreenReader(isPlaying ? 'Audio dimulai' : 'Audio dijeda');
+                } catch (error) {
+                    console.error('Error in playPause:', error);
+                    announceToScreenReader('Terjadi kesalahan audio');
+                }
+            }
+
+            function previousTrack() {
+                if (audioTracks.length === 0) return;
+                
+                if (isShuffling) {
+                    currentTrack = Math.floor(Math.random() * audioTracks.length);
+                } else {
+                    currentTrack = (currentTrack - 1 + audioTracks.length) % audioTracks.length;
+                }
+                
+                loadTrack(currentTrack);
+                if (isPlaying) {
+                    audioPlayer.play();
+                }
+                announceToScreenReader(`Pindah ke ${audioTracks[currentTrack].title}`);
+                showTrackInfo();
+            }
+
+            function nextTrack() {
+                if (audioTracks.length === 0) return;
+                
+                if (isShuffling) {
+                    currentTrack = Math.floor(Math.random() * audioTracks.length);
+                } else {
+                    currentTrack = (currentTrack + 1) % audioTracks.length;
+                }
+                
+                loadTrack(currentTrack);
+                if (isPlaying) {
+                    audioPlayer.play();
+                }
+                announceToScreenReader(`Pindah ke ${audioTracks[currentTrack].title}`);
+                showTrackInfo();
+            }
+
+            function toggleRepeat() {
+                isRepeating = !isRepeating;
+                audioPlayer.loop = isRepeating;
+                repeatBtn.classList.toggle('active', isRepeating);
+                announceToScreenReader(isRepeating ? 'Repeat aktif' : 'Repeat nonaktif');
+            }
+
+            function toggleShuffle() {
+                isShuffling = !isShuffling;
+                shuffleBtn.classList.toggle('active', isShuffling);
+                announceToScreenReader(isShuffling ? 'Shuffle aktif' : 'Shuffle nonaktif');
+            }
+
+            function loadTrack(index) {
+                if (audioTracks[index]) {
+                    audioPlayer.src = audioTracks[index].src;
+                    audioPlayer.load();
+                    updateTrackInfo();
+                }
+            }
+
+            function updateVolumeDisplay() {
+                const percentage = Math.round(currentVolume * 100);
+                volumeFill.style.width = percentage + '%';
+                volumeText.textContent = percentage + '%';
+            }
+
+            function updateTrackInfo() {
+                if (audioTracks[currentTrack]) {
+                    trackTitle.textContent = audioTracks[currentTrack].title;
+                    trackNumber.textContent = `${currentTrack + 1} / ${audioTracks.length}`;
+                } else {
+                    trackTitle.textContent = 'No Track Selected';
+                    trackNumber.textContent = '0 / 0';
+                }
+            }
+
+            function updateProgressBar() {
+                if (duration > 0) {
+                    const progress = (currentTime / duration) * 100;
+                    progressBar.style.width = progress + '%';
+                    
+                    const currentMinutes = Math.floor(currentTime / 60);
+                    const currentSeconds = Math.floor(currentTime % 60);
+                    const durationMinutes = Math.floor(duration / 60);
+                    const durationSeconds = Math.floor(duration % 60);
+                    
+                    timeDisplay.textContent = 
+                        `${currentMinutes}:${currentSeconds.toString().padStart(2, '0')} / ${durationMinutes}:${durationSeconds.toString().padStart(2, '0')}`;
+                }
+            }
+
+            function showVolumeIndicator() {
+                volumeIndicator.classList.add('show');
+                setTimeout(() => {
+                    volumeIndicator.classList.remove('show');
+                }, 2000);
+            }
+
+            function showTrackInfo() {
+                trackInfo.classList.add('show');
+                setTimeout(() => {
+                    trackInfo.classList.remove('show');
+                }, 3000);
+            }
+
+            function announceToScreenReader(message) {
+                const announcement = document.createElement('div');
+                announcement.setAttribute('aria-live', 'polite');
+                announcement.setAttribute('aria-atomic', 'true');
+                announcement.className = 'sr-only';
+                announcement.textContent = message;
+                document.body.appendChild(announcement);
+                setTimeout(() => document.body.removeChild(announcement), 1000);
+            }
+
+            // Event listeners
+            playBtn.addEventListener('click', playPause);
+            prevBtn.addEventListener('click', previousTrack);
+            nextBtn.addEventListener('click', nextTrack);
+            repeatBtn.addEventListener('click', toggleRepeat);
+            shuffleBtn.addEventListener('click', toggleShuffle);
+
+            // Progress bar click to seek
+            progressContainer.addEventListener('click', function(e) {
+                if (duration > 0) {
+                    const rect = progressContainer.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const percentage = clickX / rect.width;
+                    const newTime = percentage * duration;
+                    
+                    audioPlayer.currentTime = newTime;
+                    announceToScreenReader(`Pindah ke ${Math.floor(newTime / 60)}:${Math.floor(newTime % 60).toString().padStart(2, '0')}`);
+                }
+            });
+
+            // Keyboard controls
+            document.addEventListener('keydown', function(event) {
+                // Prevent default only for our handled keys
+                const handledKeys = [' ', 'Spacebar', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'r', 'R', 's', 'S', 'Escape'];
+                if (handledKeys.includes(event.key)) {
+                    event.preventDefault();
+                }
+
+                switch(event.key) {
+                    case ' ':
+                    case 'Spacebar':
+                        playPause();
+                        break;
+                    case 'ArrowLeft':
+                        previousTrack();
+                        break;
+                    case 'ArrowRight':
+                        nextTrack();
+                        break;
+                    case 'ArrowUp':
+                        currentVolume = Math.min(1, currentVolume + 0.1);
+                        audioPlayer.volume = currentVolume;
+                        updateVolumeDisplay();
+                        showVolumeIndicator();
+                        break;
+                    case 'ArrowDown':
+                        currentVolume = Math.max(0, currentVolume - 0.1);
+                        audioPlayer.volume = currentVolume;
+                        updateVolumeDisplay();
+                        showVolumeIndicator();
+                        break;
+                    case 'r':
+                    case 'R':
+                        toggleRepeat();
+                        break;
+                    case 's':
+                    case 'S':
+                        toggleShuffle();
+                        break;
+                    case 'Escape':
+                        instructions.classList.toggle('show');
+                        break;
+                }
+            });
+
+            // Audio player events
+            audioPlayer.addEventListener('loadedmetadata', function() {
+                duration = audioPlayer.duration;
+                updateProgressBar();
+            });
+
+            audioPlayer.addEventListener('timeupdate', function() {
+                currentTime = audioPlayer.currentTime;
+                updateProgressBar();
+            });
+
+            audioPlayer.addEventListener('ended', function() {
+                if (!isRepeating) {
+                    nextTrack();
+                }
+            });
+
+            audioPlayer.addEventListener('play', function() {
+                isPlaying = true;
+                playBtn.textContent = 'Pause';
+                playBtn.classList.add('active');
+                contentImg.classList.add('focused');
+            });
+
+            audioPlayer.addEventListener('pause', function() {
+                isPlaying = false;
+                playBtn.textContent = 'Play';
+                playBtn.classList.remove('active');
+                contentImg.classList.remove('focused');
+            });
+
+            audioPlayer.addEventListener('error', function(e) {
+                console.error('Audio error:', e);
+                announceToScreenReader('Terjadi kesalahan saat memuat audio');
+                isPlaying = false;
+                playBtn.textContent = 'Play';
+                playBtn.classList.remove('active');
+            });
+
+            // Focus management
+            contentImg.addEventListener('focus', function() {
+                announceToScreenReader('Interface audio. Tekan spasi untuk play/pause.');
+            });
+
+            // Mouse interaction
+            contentImg.addEventListener('click', playPause);
+
+            // Window events
+            window.addEventListener('resize', function() {
+                // Handle responsive adjustments if needed
+            });
+
+            // Initialize first track
+            if (audioTracks.length > 0) {
+                loadTrack(0);
+            }
+
+            // Also trigger checkAllLoaded in case images are already cached
+            setTimeout(checkAllLoaded, 100);
+        });
+    </script>
+</body>
+</html>
