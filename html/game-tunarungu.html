@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Edukasi Tunarungu - Lindungi Pohon</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: url('../assets/Background/TunarunguBG.jpg') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .welcome-modal {
+      position: fixed;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.97);
+      border-radius: 24px;
+      box-shadow: 0 8px 40px 0 rgba(60,120,60,0.18);
+      padding: 40px 32px 32px 32px;
+      z-index: 1001;
+      text-align: center;
+      min-width: 340px;
+      max-width: 90vw;
+      animation: popin 0.7s cubic-bezier(.23,1.12,.62,1.01);
+    }
+    @keyframes popin {
+      0% { transform: translate(-50%,-60%) scale(0.7); opacity: 0; }
+      100% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+    }
+    .welcome-modal h1 {
+      font-size: 2.1rem;
+      color: #388e3c;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    .welcome-modal .emoji {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+      display: block;
+      animation: bounce 1.2s infinite alternate;
+    }
+    @keyframes bounce {
+      0% { transform: translateY(0);}
+      100% { transform: translateY(-10px);}
+    }
+    .welcome-modal p {
+      font-size: 1.15rem;
+      color: #333;
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+    .welcome-modal button {
+      padding: 10px 36px;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 12px rgba(56,143,60,0.13);
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 1px;
+    }
+    .welcome-modal button:hover {
+      background: linear-gradient(90deg, #388e3c 0%, #43e97b 100%);
+      transform: scale(1.04);
+    }
+    .howto-modal {
+      position: fixed;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 40px 0 rgba(60,120,60,0.18);
+      padding: 32px 28px 24px 28px;
+      z-index: 1002;
+      text-align: left;
+      min-width: 300px;
+      max-width: 92vw;
+      display: none;
+      animation: popin 0.6s;
+    }
+    .howto-modal h2 {
+      margin-top: 0;
+      color: #31710f;
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+    .howto-modal ol {
+      margin: 0 0 10px 18px;
+      padding: 0;
+      font-size: 1.07rem;
+    }
+    .howto-modal li {
+      margin-bottom: 7px;
+    }
+    .howto-modal .howto-tips {
+      margin-top: 10px;
+      font-size: 0.98rem;
+      color: #226d1b;
+    }
+    .howto-modal button {
+      margin-top: 18px;
+      background: #43a047;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 10px 28px;
+      border-radius: 18px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 18px #2e7d32a8;
+      transition: background-color 0.3s;
+      outline: none;
+      display: inline-block;
+    }
+    .howto-modal button:hover {
+      background: #357a38;
+    }
+    .game-area {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .scoreboard {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 12px;
+      padding: 10px 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      z-index: 10;
+      min-width: 180px;
+    }
+    .scoreboard h1 {
+      font-size: 18px;
+      color: #2d5d2c;
+      margin: 0 0 5px 0;
+    }
+    .scoreboard p {
+      margin: 2px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    .ground {
+      position: absolute;
+      left: 50%;
+      top: 72%;
+      transform: translate(-50%, 0);
+      width: 300px;
+      height: 60px;
+      background: #8d6e63;
+      border-radius: 50% 50% 60% 60%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      cursor: pointer;
+      z-index: 2;
+      transition: background 0.2s;
+    }
+    .ground.clicked {
+      background: #6d4c41;
+      cursor: default;
+    }
+    .tree-stage {
+      position: absolute;
+      left: 50%;
+      top: 72%;
+      transform: translate(-50%, -100%);
+      opacity: 0;
+      z-index: 3;
+      transition: opacity 0.5s;
+      pointer-events: none;
+    }
+    .tree-stage.active {
+      opacity: 1;
+    }
+    .tree-stage.stage-0 { width: 40px; height: 40px; }
+    .tree-stage.stage-1 { width: 60px; height: 60px; }
+    .tree-stage.stage-2 { width: 90px; height: 110px; }
+    .tree-stage.stage-3 { width: 120px; height: 180px; }
+    .progress-bar-bg {
+      position: absolute;
+      left: 50%;
+      top: 66%;
+      transform: translate(-50%, 0);
+      width: 220px;
+      height: 18px;
+      background: #eee;
+      border-radius: 10px;
+      overflow: hidden;
+      z-index: 5;
+      border: 2px solid #bbb;
+      display: none;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #81c784, #388e3c);
+      width: 0%;
+      transition: width 0.2s;
+    }
+    .info-text {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      color: #333;
+      max-width: 400px;
+      font-size: 15px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 8px;
+      padding: 8px 16px;
+      z-index: 100;
+    }
+    .hidden { display: none !important; }
+    .result-modal {
+      position: fixed;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      padding: 32px 40px;
+      z-index: 999;
+      text-align: center;
+      min-width: 300px;
+      display: none;
+    }
+    .result-modal h2 {
+      margin: 0 0 12px 0;
+      color: #2d5d2c;
+    }
+    .result-modal button {
+      margin-top: 18px;
+      padding: 8px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background: #388e3c;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: inline-block;
+    }
+    .result-modal button:hover {
+      background: #2e7031;
+    }
+    .result-modal a#result-next {
+      margin-top: 18px;
+      padding: 10px 36px 10px 20px;
+      font-size: 1.15rem;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 12px rgba(56,143,60,0.13);
+      transition: background 0.2s, transform 0.15s;
+      letter-spacing: 1px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .result-modal a#result-next:hover {
+      background: linear-gradient(90deg, #388e3c 0%, #43e97b 100%);
+      transform: scale(1.05);
+      color: #fff;
+    }
+    .result-modal a#result-next img {
+      height: 28px;
+      width: 28px;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @media (max-width: 600px) {
+      .ground { width: 180px; height: 38px; }
+      .tree-stage.stage-0 { width: 26px; height: 26px; }
+      .tree-stage.stage-1 { width: 38px; height: 38px; }
+      .tree-stage.stage-2 { width: 60px; height: 70px; }
+      .tree-stage.stage-3 { width: 80px; height: 120px; }
+      .progress-bar-bg { width: 120px; height: 12px; }
+      .howto-modal { padding: 18px 8px 14px 8px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Welcome Modal -->
+  <div class="welcome-modal" id="welcome-modal">
+    <span class="emoji">👋🌳</span>
+    <h1>Selamat Datang di Misi Pertama!</h1>
+    <p>
+      Di <b>Game Sahabat Alam</b>, kamu akan <b>menanam pohon</b> dan <b>menjaga pohon</b>.<br><br>
+      Yuk mulai petualanganmu, klik tombol di bawah ini untuk lanjut ke permainan!
+    </p>
+    <button id="show-howto-btn" style="margin-bottom:10px;background:#e0f2e9;color:#31710f;font-weight:600;font-size:1rem;padding:8px 22px;border-radius:16px;border:none;cursor:pointer;">Lihat Cara Main</button>
+    <br>
+    <button id="start-btn">Mulai Misi</button>
+  </div>
+  <!-- Petunjuk Modal -->
+  <div class="howto-modal" id="howto-modal">
+    <h2>Cara Bermain 🌱</h2>
+    <ol>
+      <li>Klik tanah di tengah layar untuk menanam bibit pohon.</li>
+      <li>Tunggu beberapa detik, pohon akan tumbuh secara bertahap.</li>
+      <li>Setelah pohon tumbuh besar, kamu bisa lanjut ke misi berikutnya.</li>
+    </ol>
+    <div class="howto-tips">
+      <b>Tips:</b> Sabar menunggu pohon tumbuh. Tidak ada hama di misi ini, fokus menanam saja!
+    </div>
+    <button id="close-howto-btn">Tutup</button>
+  </div>
+  <div class="game-area">
+    <div class="scoreboard">
+      <h1>🌱 Tanam Pohon</h1>
+      <p id="level-text">Level 1: Tanam & Tumbuhkan Pohon</p>
+      <p id="timer-text">Waktu: <span id="timer">0</span> detik</p>
+    </div>
+    <div class="ground" id="ground"></div>
+    <!-- Animasi pohon bertahap -->
+    <img src="../assets/Sprite/pohon1.png" class="tree-stage stage-0 active" id="tree-stage-0" draggable="false" />
+    <img src="../assets/Sprite/pohon2.png" class="tree-stage stage-1" id="tree-stage-1" draggable="false" />
+    <img src="../assets/Sprite/pohon3.png" class="tree-stage stage-2" id="tree-stage-2" draggable="false" />
+    <img src="../assets/Sprite/pohon gede (2).png" class="tree-stage stage-3" id="tree-stage-3" draggable="false" />
+    <div class="progress-bar-bg" id="progress-bar-bg">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="info-text" id="info-text">
+      Klik tanah untuk menanam pohon di tengah.<br>
+      Setelah pohon tumbuh, kamu bisa lanjut ke misi berikutnya!
+    </div>
+    <div class="result-modal" id="result-modal">
+      <h2 id="result-title"></h2>
+      <p id="result-msg"></p>
+      <a id="result-next" href="../html/tunarunguquest2.html" style="display:none">
+        Lanjut Misi Berikutnya
+      </a>
+      <button id="result-retry" onclick="location.reload()" style="display:none">Main Lagi</button>
+    </div>
+  </div>
+  <script>
+    // Welcome Modal Logic
+    const welcomeModal = document.getElementById('welcome-modal');
+    const startBtn = document.getElementById('start-btn');
+    const showHowtoBtn = document.getElementById('show-howto-btn');
+    const howtoModal = document.getElementById('howto-modal');
+    const closeHowtoBtn = document.getElementById('close-howto-btn');
+    const gameArea = document.querySelector('.game-area');
+    gameArea.style.filter = "blur(2.5px)";
+    gameArea.style.pointerEvents = "none";
+
+    showHowtoBtn.addEventListener('click', function() {
+      howtoModal.style.display = "block";
+    });
+    closeHowtoBtn.addEventListener('click', function() {
+      howtoModal.style.display = "none";
+    });
+
+    startBtn.addEventListener('click', function() {
+      welcomeModal.style.display = "none";
+      howtoModal.style.display = "none";
+      gameArea.style.filter = "none";
+      gameArea.style.pointerEvents = "auto";
+    });
+
+    // --- Game State ---
+    let level = 1;
+    let treePlanted = false;
+    let treeGrown = false;
+    let growTime = 15; // detik
+    let growInterval, timerInterval;
+    let timeLeft = 0;
+    let growStage = 0;
+    const growStages = [
+      { id: "tree-stage-0", duration: 4 },
+      { id: "tree-stage-1", duration: 4 },
+      { id: "tree-stage-2", duration: 3 },
+      { id: "tree-stage-3", duration: 4 }
+    ];
+
+    // --- DOM ---
+    const ground = document.getElementById('ground');
+    const treeStagesImg = [
+      document.getElementById('tree-stage-0'),
+      document.getElementById('tree-stage-1'),
+      document.getElementById('tree-stage-2'),
+      document.getElementById('tree-stage-3')
+    ];
+    const progressBarBg = document.getElementById('progress-bar-bg');
+    const progressBar = document.getElementById('progress-bar');
+    const infoText = document.getElementById('info-text');
+    const timerText = document.getElementById('timer');
+    const levelText = document.getElementById('level-text');
+    const resultModal = document.getElementById('result-modal');
+    const resultTitle = document.getElementById('result-title');
+    const resultMsg = document.getElementById('result-msg');
+    const resultNext = document.getElementById('result-next');
+    const resultRetry = document.getElementById('result-retry');
+
+    // --- Assets ---
+    const treeGrowSfx = new Audio('https://www.soundjay.com/button/beep-01a.wav');
+    const winSfx = new Audio('https://www.soundjay.com/button/beep-06.wav');
+
+    // --- Plant Tree ---
+    ground.addEventListener('click', function() {
+      if (treePlanted) return;
+      treePlanted = true;
+      ground.classList.add('clicked');
+      infoText.textContent = "Pohon sedang tumbuh... Tunggu 15 detik!";
+      progressBarBg.style.display = 'block';
+      timeLeft = growTime;
+      timerText.textContent = timeLeft;
+      levelText.textContent = "Level 1: Pohon Tumbuh";
+      growStage = 0;
+      showTreeStage(0);
+      growProgress();
+      treeGrowSfx.play();
+    });
+
+    function showTreeStage(stageIdx) {
+      treeStagesImg.forEach((img, idx) => {
+        if (idx === stageIdx) img.classList.add('active');
+        else img.classList.remove('active');
+      });
+    }
+
+    function growProgress() {
+      let elapsed = 0;
+      let stageElapsed = 0;
+      let stageIdx = 0;
+      let stageTime = growStages[stageIdx].duration;
+      progressBar.style.width = "0%";
+      timerInterval = setInterval(() => {
+        elapsed++;
+        stageElapsed++;
+        timeLeft = growTime - elapsed;
+        timerText.textContent = timeLeft;
+        progressBar.style.width = ((elapsed / growTime) * 100) + "%";
+        if (stageElapsed >= stageTime && stageIdx < growStages.length - 1) {
+          stageIdx++;
+          stageElapsed = 0;
+          stageTime = growStages[stageIdx].duration;
+          showTreeStage(stageIdx);
+          treeGrowSfx.currentTime = 0; treeGrowSfx.play();
+        }
+        if (elapsed >= growTime) {
+          clearInterval(timerInterval);
+          showTreeStage(3);
+          progressBarBg.style.display = 'none';
+          treeGrown = true;
+          finishPlantScene();
+        }
+      }, 1000);
+    }
+
+    function finishPlantScene() {
+      winSfx.play();
+      resultTitle.textContent = "Pohonmu Sudah Tumbuh!";
+      resultMsg.textContent = "Selamat, kamu berhasil menanam dan menumbuhkan pohon. Yuk lanjut ke misi berikutnya!";
+      resultNext.style.display = "inline-flex";
+      resultRetry.style.display = "inline-block";
+      resultModal.style.display = "block";
+    }
+  </script>
+</body>
+</html>

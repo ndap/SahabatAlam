@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quest 2: Lindungi Pohonku dari Hama!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+  html, body {
+    margin: 0; padding: 0; height: 100%; width: 100vw;
+    font-family: 'Poppins', sans-serif;
+    color: #2e4a27;
+    user-select: none;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-image: url(../assets/Background/TunarunguBG.jpg);
+    overflow: hidden; /* Mencegah scroll */
+    box-sizing: border-box;
+  }
+  body {
+    min-height: 100vh;
+    min-width: 100vw;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden !important;
+  }
+  #mainWrapper {
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+    min-width: 100vw;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+  }
+  h1 {
+    font-weight: 700;
+    font-size: 2rem;
+    margin: 12px 0 6px;
+    color: #31710f;
+    text-align: center;
+    z-index: 2;
+    position: relative;
+  }
+  #introOverlay {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: #dcedc1f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 150;
+    text-align: center;
+    padding: 20px;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  #introOverlay h2 {
+    font-size: 2.25rem;
+    margin-bottom: 16px;
+    color: #31710f;
+    font-weight: 700;
+    animation: fadeInDown 1.2s ease forwards;
+  }
+  #introOverlay p {
+    font-size: 1.2rem;
+    margin-bottom: 24px;
+    max-width: 420px;
+    color: #266e0e;
+    line-height: 1.3;
+    animation: fadeInUp 1.2s ease forwards;
+  }
+  #showHowToBtn {
+    background: #4caf50;
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    padding: 14px 36px;
+    border-radius: 24px;
+    cursor: pointer;
+    box-shadow: 0 6px 12px #2e7d32a8;
+    transition: background-color 0.3s ease;
+    animation: fadeInUp 1.2s ease forwards;
+  }
+  #showHowToBtn:hover {
+    background: #3b923a;
+  }
+  #howToPlayOverlay {
+    display: none;
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    z-index: 151;
+    background: #eafbe7ee;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  #howToPlayOverlay .howto-content {
+    max-width:600px;
+    margin:40px auto;
+    background:#fff;
+    border-radius:18px;
+    padding:32px 32px 24px 32px;
+    box-shadow:0 8px 32px #b2d6a6aa;
+  }
+  #howToPlayOverlay h2 {
+    margin-top:0;
+    color:#31710f;
+    font-size:1.4rem;
+  }
+  #howToPlayOverlay ol {
+    padding-left:20px;
+    margin-bottom:0;
+    font-size:1.08rem;
+  }
+  #howToPlayOverlay .howto-tips {
+    margin-top:12px;
+    font-size:0.98rem;
+  }
+  #startGameBtn {
+    margin-top:26px;
+    background:#43a047;
+    color:#fff;
+    font-weight:700;
+    font-size:18px;
+    padding:14px 38px;
+    border-radius:24px;
+    border:none;
+    cursor:pointer;
+    box-shadow:0 4px 18px #2e7d32a8;
+    transition:background-color 0.3s;
+  }
+  #startGameBtn:hover {
+    background:#357a38;
+  }
+  #gameContainer {
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+    min-width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: relative;
+    padding: 0;
+    visibility: hidden;
+    cursor: default;
+    overflow: hidden;
+  }
+  #gameContainer.active {
+    visibility: visible;
+  }
+  #header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    padding: 0 12px;
+    color: #31710f;
+    z-index: 2;
+  }
+  #treeArea {
+    position: relative;
+    flex: 1;
+    overflow: visible;
+    min-height: 320px;
+    max-height: 500px;
+    height: 450px;
+    width: 100vw;
+    margin: 0 auto;
+    z-index: 1;
+  }
+  #tree {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,0.15));
+    user-select: none;
+    pointer-events: none;
+  }
+  #tree.stage-1 { width: 100px; }
+  #tree.stage-2 { width: 140px; }
+  #tree.stage-3 { width: 180px; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2)); }
+  #tree.stage-4 { width: 220px; filter: drop-shadow(0 6px 4px rgba(0,0,0,0.35)); }
+  #bugArea {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    overflow: visible;
+    width: 100vw;
+    height: 100%;
+  }
+  .bug {
+    position: absolute;
+    font-size: 28px;
+    user-select: none;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 0 2px #4447);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    white-space: nowrap;
+  }
+  .bug.slow-motion {
+    transition-duration: 2s !important;
+    filter: drop-shadow(0 0 5px #ffa500aa);
+  }
+  .bug-label {
+    margin-top: 2px;
+    font-size: 12px;
+    background: rgba(255 255 255 / 0.85);
+    padding: 2px 6px;
+    border-radius: 10px;
+    color: #2e4a27;
+    font-weight: 600;
+    text-align: center;
+    max-width: 140px;
+  }
+  #toolsPanel {
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    user-select: none;
+    z-index: 2;
+  }
+  .tool {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    background: #9edd89;
+    box-shadow: 0 4px 6px #7bb967;
+    font-size: 36px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    user-select:none;
+    border: 3px solid transparent;
+  }
+  .tool:hover {
+    transform: scale(1.15);
+    border-color: #4caf50;
+    box-shadow: 0 4px 12px #4caf5088;
+  }
+  #avatarPakBurung {
+    position: absolute;
+    bottom: 4px;
+    left: 12px;
+    width: 100px;
+    height: 100px;
+    background: #4caf50;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px #2a6b15;
+    font-size: 60px;
+    text-align: center;
+    line-height: 100px;
+    filter: drop-shadow(0 0 5px #216413cc);
+    user-select:none;
+    pointer-events:none;
+    z-index: 2;
+  }
+  #messageBox {
+    position: absolute;
+    bottom: 120px;
+    left: 24px;
+    width: 280px;
+    background: #d1e7c1cc;
+    border: 2px solid #4caf50;
+    border-radius: 14px;
+    padding: 12px 18px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2e4a27;
+    text-align: left;
+    user-select:none;
+    pointer-events:none;
+    backdrop-filter: saturate(180%) blur(10px);
+    z-index: 2;
+  }
+  #healthBarContainer {
+    position: absolute;
+    left: 50%;
+    top: 18px;
+    transform: translateX(-50%);
+    width: 320px;
+    height: 22px;
+    background: #e0f2e9;
+    border: 2px solid #31710f;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px #b2d6a6aa;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  #healthBar {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50 60%, #a8e6cf 100%);
+    border-radius: 12px 0 0 12px;
+    transition: width 0.4s cubic-bezier(.4,2,.6,1);
+    font-weight: bold;
+    color: #226d1b;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 20px;
+    min-width: 0;
+  }
+  #healthBarText {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 1rem;
+    font-weight: 700;
+    color: #226d1b;
+    pointer-events: none;
+    z-index: 2;
+  }
+  #scoreBoard {
+    font-size: 20px;
+    font-weight: 700;
+    text-align:center;
+    margin-top: 14px;
+    color: #31710f;
+  }
+  #startBtn {
+    margin: 16px auto 8px;
+    background: #4caf50;
+    color: white;
+    border:none;
+    border-radius: 24px;
+    font-weight: 700;
+    font-size: 18px;
+    padding: 12px 28px;
+    cursor: pointer;
+    box-shadow: 0 6px 12px #2e7d32a8;
+    transition: background-color 0.3s ease;
+  }
+  #startBtn:hover:not(:disabled) {
+    background: #3b923a;
+  }
+  #startBtn:disabled {
+    background: #9ccc8f;
+    cursor: default;
+  }
+  #timerCircle {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 6px solid #7ac47a;
+    box-shadow: 0 0 8px #7ac47a88 inset;
+    font-weight: 900;
+    color: #31710f;
+    font-family: monospace;
+    font-size: 28px;
+    line-height: 66px;
+    user-select:none;
+    pointer-events:none;
+    background: rgba(255 255 255 / 0.7);
+    z-index: 2;
+  }
+  #eduBox {
+    max-width: 800px;
+    margin: 12px auto 0;
+    background: rgba(212, 241, 212, 0.8);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 17px;
+    font-weight: 600;
+    color: #266e0e;
+    text-align: center;
+    box-shadow: 0 8px 16px #b2d6a6aa inset;
+    z-index: 2;
+  }
+  #quizModal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 320px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.3);
+    padding: 20px 28px;
+    display: none;
+    z-index: 99;
+  }
+  #quizModal h2 {
+    font-size: 20px;
+    margin-bottom: 14px;
+    color: #31710f;
+  }
+  .quiz-answer {
+    background: #ecf8e7;
+    margin: 8px 0;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px #9bdd90;
+    user-select:none;
+  }
+  .quiz-answer:hover {
+    background: #c2e59c;
+    box-shadow: 0 4px 12px #7bb967;
+  }
+  #closeQuizBtn {
+    margin-top: 16px;
+    background: #4caf50;
+    color: white;
+    padding: 10px 20px;
+    border:none;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #gameOverOverlay {
+    position: fixed;
+    top: 0; left: 0; right:0; bottom:0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  #gameOverContent {
+    background: #eaf4d6;
+    padding: 30px 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    max-width: 320px;
+  }
+  #gameOverContent h2 {
+    margin-bottom: 20px;
+    color: #31710f;
+  }
+  #nextMissionBtn {
+    background: #4caf50;
+    color: white;
+    border:none;
+    padding: 14px 28px;
+    border-radius: 24px;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 6px 12px #2e7d32a8;
+    transition: background-color 0.3s ease;
+  }
+  #nextMissionBtn:hover {
+    background: #3b923a;
+  }
+  #treeDeadOverlay {
+    position: fixed;
+    top: 0; left: 0; right:0; bottom:0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  #treeDeadContent {
+    background: #fffbe9;
+    padding: 36px 40px 32px 40px;
+    border-radius: 22px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    max-width: 340px;
+    min-width: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeInScale 0.5s;
+  }
+  #treeDeadContent h2 {
+    color: #d32f2f;
+    margin-bottom: 18px;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  #treeDeadContent p {
+    color: #444;
+    font-size: 1.08rem;
+    margin-bottom: 22px;
+    margin-top: 0;
+  }
+  #retryBtn {
+    background: #43a047;
+    color: #fff;
+    font-weight: 700;
+    font-size: 18px;
+    padding: 14px 38px;
+    border-radius: 24px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 18px #2e7d32a8;
+    transition: background-color 0.3s;
+    margin-top: 0;
+    margin-bottom: 0;
+    letter-spacing: 0.5px;
+    outline: none;
+    display: inline-block;
+  }
+  #retryBtn:hover {
+    background: #357a38;
+  }
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.8);}
+    to { opacity: 1; transform: scale(1);}
+  }
+  body.cursor-spider { cursor: url('https://twemoji.maxcdn.com/v/latest/svg/1f577.svg') 16 16, auto; }
+  body.cursor-bird   { cursor: url('https://twemoji.maxcdn.com/v/latest/svg/1f426.svg') 16 16, auto; }
+  body.cursor-stickyTrap { cursor: url('https://twemoji.maxcdn.com/v/latest/svg/1f342.svg') 16 16, auto; }
+  body.cursor-flower { cursor: url('https://twemoji.maxcdn.com/v/latest/svg/1f338.svg') 16 16, auto; }
+  .tool, #bugArea { cursor: pointer; }
+  @media (max-width: 600px) {
+    #treeArea { height: 320px; }
+    #toolsPanel { gap: 12px; }
+    .tool { width: 54px; height: 54px; font-size: 30px; }
+    #avatarPakBurung { width: 80px; height: 80px; font-size: 48px; line-height: 80px; }
+    #messageBox { width: 200px; font-size: 14px; }
+    #eduBox { max-width: 90vw; padding: 10px 14px; font-size: 15px; }
+    #gameOverContent { max-width: 90vw; padding: 20px 22px; }
+    #healthBarContainer { width: 90vw; min-width: 80px; }
+    #treeDeadContent { min-width: 0; max-width: 90vw; }
+    html, body, #mainWrapper, #gameContainer { min-width: 100vw; min-height: 100vh; width: 100vw; height: 100vh; }
+  }
+</style>
+</head>
+<body>
+<div id="mainWrapper">
+  <h1>Quest 2: Lindungi Pohonku dari Hama!</h1>
+
+  <!-- Intro Overlay -->
+  <div id="introOverlay" role="dialog" aria-modal="true" aria-labelledby="introTitle" aria-describedby="introDesc">
+    <h2 id="introTitle">Selamat Datang di Quest 2!</h2>
+    <p id="introDesc">
+      Pohonmu mulai tumbuh tapi banyak serangga hama yang mengganggu.<br>
+      Yuk, baca dulu cara mainnya sebelum mulai!
+    </p>
+    <button id="showHowToBtn" aria-label="Lihat Cara Bermain">Lihat Cara Bermain</button>
+  </div>
+
+  <!-- Cara Bermain Overlay -->
+  <div id="howToPlayOverlay">
+    <div class="howto-content">
+      <h2>Cara Bermain 🌳</h2>
+      <ol>
+        <li>Pilih alat alami di bawah area permainan (🕷️, 🐦, 🍃, atau 🌸) dengan klik salah satu ikon.</li>
+        <li>Setelah memilih alat, klik pada serangga hama yang muncul di sekitar pohon untuk mengusirnya.</li>
+        <li>Jangan klik kupu-kupu 🦋 karena mereka bukan hama!</li>
+        <li>Setiap hama yang berhasil diusir akan menambah skor dan membuat pohon tumbuh lebih besar.</li>
+        <li>Permainan berlangsung selama 25 detik. Lindungi pohonmu sebanyak mungkin!</li>
+      </ol>
+      <div class="howto-tips">
+        <b>Tips:</b> Gunakan alat yang tepat untuk setiap hama agar skor maksimal dan pohon tumbuh subur!
+      </div>
+      <button id="startGameBtn">Mainkan Sekarang</button>
+    </div>
+  </div>
+
+  <div id="gameContainer" aria-live="polite" aria-atomic="true">
+    <div id="header">
+      <div>Skor: <span id="score">0</span></div>
+      <div id="timerCircle" aria-live="assertive" aria-atomic="true">25</div>
+    </div>
+    <div id="treeArea" aria-label="Area pohon dan serangga hama">
+      <div id="healthBarContainer">
+        <div id="healthBar" style="width:100%"></div>
+        <span id="healthBarText">100%</span>
+      </div>
+      <img id="tree" class="stage-1" src="../assets/Sprite/pohon4.png" alt="Pohon Kecil" />
+      <div id="bugArea"></div>
+      <div id="avatarPakBurung" title="Avatar Pak Burung isyarat">🦜</div>
+      <div id="messageBox" role="alert" aria-live="assertive"></div>
+    </div>
+
+    <nav id="toolsPanel" aria-label="Alat Pelindung Pohon">
+      <button class="tool" data-tool="spider" title="Laba-laba 🕷️" role="button" tabindex="0" aria-pressed="false">🕷️</button>
+      <button class="tool" data-tool="bird" title="Burung Pemakan Serangga 🐦" role="button" tabindex="0" aria-pressed="false">🐦</button>
+      <button class="tool" data-tool="stickyTrap" title="Perangkap Daun Lengket 🍃" role="button" tabindex="0" aria-pressed="false">🍃</button>
+      <button class="tool" data-tool="flower" title="Bunga Pengusir Hama 🌸" role="button" tabindex="0" aria-pressed="false">🌸</button>
+    </nav>
+
+    <button id="startBtn" aria-label="Mulai Permainan" hidden>Mulai Permainan</button>
+
+    <div id="eduBox" aria-live="polite" aria-atomic="true" style="margin-top:12px;">
+      <b>Fakta Alam:</b> Beberapa hama yang mengganggu pohon antara lain ulat 🐛, belalang 🦗, dan wereng 🪱.
+    </div>
+  </div>
+
+  <!-- Overlay pohon mati -->
+  <div id="treeDeadOverlay">
+    <div id="treeDeadContent">
+      <h2>Pohonmu Mati 😢</h2>
+      <p>Sayang sekali, pohonmu sudah tidak kuat karena terlalu banyak diserang hama.<br>Yuk coba lagi dan lindungi pohonmu lebih baik!</p>
+      <button id="retryBtn">Ulangi Permainan</button>
+    </div>
+  </div>
+
+  <!-- Game Over Overlay -->
+  <div id="gameOverOverlay" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+    <div id="gameOverContent">
+      <h2 id="gameOverTitle">Permainan Telah Selesai!</h2>
+      <p id="finalScoreText" style="margin-bottom:20px;font-size:18px;color:#31710f;"></p>
+      <button id="nextMissionBtn" aria-label="Lanjut ke Misi Berikutnya">Misi Berikutnya</button>
+    </div>
+  </div>
+
+  <!-- Mini Quiz -->
+  <div id="quizModal" role="dialog" aria-modal="true" aria-labelledby="quizTitle" aria-describedby="quizDesc">
+    <h2 id="quizTitle">Mini Quiz: Mana yang termasuk hama?</h2>
+    <div id="quizDesc" style="margin-bottom:12px;">Klik pilihan yang benar.</div>
+    <div class="quiz-answer" data-correct="false" tabindex="0">🦋 Kupu-kupu</div>
+    <div class="quiz-answer" data-correct="true" tabindex="0">🐛 Ulat</div>
+    <div class="quiz-answer" data-correct="true" tabindex="0">🦗 Belalang</div>
+    <div class="quiz-answer" data-correct="true" tabindex="0">🪱 Wereng</div>
+    <button id="closeQuizBtn">Tutup Quiz</button>
+  </div>
+</div>
+<script>
+(() => {
+  // --- DATA & VARIABEL ---
+  const GAME_DURATION = 25;
+  const BUG_SPAWN_INTERVAL = 2200;
+  const TREE_STAGES = 4;
+  const TREE_GROWTH_SCORE = 40;
+  const TREE_MAX_HEALTH = 100;
+  const TREE_HIT_DAMAGE = 20;
+  const BUGS_DATA = [
+    {
+      id:'ulat', emoji:'🐛', isHama:true,
+      goodTool:['spider','bird'],
+      badTool:['pesticide','plasticNet'],
+      description: 'Ulat merusak daun pohon.',
+      naturalControl: 'Gunakan laba-laba 🕷️ atau burung 🐦'
+    },
+    {
+      id:'belalang', emoji:'🦗', isHama:true,
+      goodTool:['stickyTrap','flower'],
+      badTool:['plasticNet','pesticide'],
+      description: 'Belalang suka menggerogoti tanaman.',
+      naturalControl: 'Pasang jaring daun lengket 🍃 atau tanam bunga pengusir 🌸'
+    },
+    {
+      id:'wereng', emoji:'🪱', isHama:true,
+      goodTool:['spider','bird'],
+      badTool:['pesticide'],
+      description: 'Wereng adalah hama tanaman.',
+      naturalControl: 'Gunakan laba-laba 🕷️ atau burung 🐦'
+    },
+    {
+      id:'kupu', emoji:'🦋', isHama:false,
+      goodTool:[],
+      badTool:['chase','spray'],
+      description: 'Kupu-kupu bukan hama, biarkan mereka!',
+      naturalControl: 'Biarkan kupu-kupu terbang bebas 🦋'
+    }
+  ];
+
+  const startBtn = document.getElementById('startBtn');
+  const scoreEl = document.getElementById('score');
+  const timerCircle = document.getElementById('timerCircle');
+  const bugArea = document.getElementById('bugArea');
+  const tree = document.getElementById('tree');
+  const messageBox = document.getElementById('messageBox');
+  const avatarPakBurung = document.getElementById('avatarPakBurung');
+  const toolsPanel = document.getElementById('toolsPanel');
+  const eduBox = document.getElementById('eduBox');
+  const quizModal = document.getElementById('quizModal');
+  const closeQuizBtn = document.getElementById('closeQuizBtn');
+  const quizAnswers = Array.from(quizModal.querySelectorAll('.quiz-answer'));
+  const gameOverOverlay = document.getElementById('gameOverOverlay');
+  const finalScoreText = document.getElementById('finalScoreText');
+  const nextMissionBtn = document.getElementById('nextMissionBtn');
+  const introOverlay = document.getElementById('introOverlay');
+  const showHowToBtn = document.getElementById('showHowToBtn');
+  const howToPlayOverlay = document.getElementById('howToPlayOverlay');
+  const startGameBtn = document.getElementById('startGameBtn');
+  const gameContainer = document.getElementById('gameContainer');
+  const healthBar = document.getElementById('healthBar');
+  const healthBarText = document.getElementById('healthBarText');
+  const treeDeadOverlay = document.getElementById('treeDeadOverlay');
+  const retryBtn = document.getElementById('retryBtn');
+
+  let gameTimer = null;
+  let spawnTimer = null;
+  let timeLeft = GAME_DURATION;
+  let score = 0;
+  let treeStage = 1;
+  let bugsOnScreen = [];
+  let gameRunning = false;
+  let selectedTool = null;
+  let treeHealth = TREE_MAX_HEALTH;
+
+  // Map tool name to cursor css classes
+  const toolCursorClasses = {
+    spider: 'cursor-spider',
+    bird: 'cursor-bird',
+    stickyTrap: 'cursor-stickyTrap',
+    flower: 'cursor-flower'
+  };
+
+  // --- Overlay Logic ---
+  introOverlay.style.display = 'flex';
+  howToPlayOverlay.style.display = 'none';
+  gameContainer.classList.remove('active');
+
+  showHowToBtn.addEventListener('click', function() {
+    introOverlay.style.display = 'none';
+    howToPlayOverlay.style.display = 'flex';
+  });
+  startGameBtn.addEventListener('click', function() {
+    howToPlayOverlay.style.display = 'none';
+    gameContainer.classList.add('active');
+    startGame();
+  });
+
+  // --- UTILITAS ---
+  function capitalize(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+  function updateTimerDisplay() {
+    timerCircle.textContent = timeLeft;
+    if (timeLeft <= 10) {
+      timerCircle.style.borderColor = '#f44336';
+      timerCircle.style.boxShadow = '0 0 15px #f4433633 inset';
+      timerCircle.style.color = '#b71c1c';
+    } else {
+      timerCircle.style.borderColor = '#7ac47a';
+      timerCircle.style.boxShadow = '0 0 8px #7ac47a88 inset';
+      timerCircle.style.color = '#31710f';
+    }
+  }
+  function updateScoreDisplay() {
+    scoreEl.textContent = score;
+    let newStage = Math.min(1 + Math.floor(score / TREE_GROWTH_SCORE), TREE_STAGES);
+    if (newStage !== treeStage) {
+      treeStage = newStage;
+      updateTreeStage();
+    }
+  }
+  function updateTreeStage() {
+    tree.className = 'stage-' + treeStage;
+    tree.alt = {
+      1:'Pohon kecil',
+      2:'Pohon bertunas',
+      3:'Pohon sedang tumbuh',
+      4:'Pohon dewasa kuat'
+    }[treeStage];
+  }
+  function showMessage(text, duration=4000) {
+    messageBox.textContent = text;
+    messageBox.style.opacity = '1';
+    if(duration > 0){
+      setTimeout(() => {
+        messageBox.style.opacity = '0';
+        messageBox.textContent = '';
+      }, duration);
+    }
+  }
+  function pakBurungSay(text) {
+    showMessage("Pak Burung: " + text, 5000);
+  }
+  function removeBug(bugElem) {
+    let idx = bugsOnScreen.indexOf(bugElem);
+    if(idx !== -1) bugsOnScreen.splice(idx, 1);
+    if (bugElem.parentNode) bugElem.parentNode.removeChild(bugElem);
+  }
+  function updateHealthBar() {
+    healthBar.style.width = treeHealth + "%";
+    healthBarText.textContent = treeHealth + "%";
+    if (treeHealth > 60) {
+      healthBar.style.background = "linear-gradient(90deg, #4caf50 60%, #a8e6cf 100%)";
+      healthBarText.style.color = "#226d1b";
+    } else if (treeHealth > 30) {
+      healthBar.style.background = "linear-gradient(90deg, #ffeb3b 60%, #ffe082 100%)";
+      healthBarText.style.color = "#bfa600";
+    } else {
+      healthBar.style.background = "linear-gradient(90deg, #f44336 60%, #ffcdd2 100%)";
+      healthBarText.style.color = "#b71c1c";
+    }
+  }
+  function decreaseHealth(amount) {
+    treeHealth -= amount;
+    if (treeHealth < 0) treeHealth = 0;
+    updateHealthBar();
+    if (treeHealth <= 0) {
+      treeDies();
+    }
+  }
+  function resetHealth() {
+    treeHealth = TREE_MAX_HEALTH;
+    updateHealthBar();
+  }
+  function treeDies() {
+    gameRunning = false;
+    clearInterval(gameTimer);
+    clearInterval(spawnTimer);
+    startBtn.disabled = false;
+    resetSelectedTool();
+    messageBox.textContent = '';
+    treeDeadOverlay.style.display = 'flex';
+  }
+  function bugReachedPohon(bugElem, bugData) {
+    if (bugElem.dataset.killed === 'true') return;
+    if (bugData.isHama) {
+      pakBurungSay(`Oh tidak! ${bugData.description} berhasil menyerang pohon.`);
+      score -= 5;
+      if (score < 0) score = 0;
+      updateScoreDisplay();
+      weakenTree();
+      decreaseHealth(TREE_HIT_DAMAGE);
+    } else {
+      pakBurungSay(`Ini ${bugData.description}, jangan usir ya! Mereka membantu ekosistem.`);
+    }
+  }
+  function weakenTree() {
+    if (treeStage > 1) {
+      treeStage--;
+      updateTreeStage();
+    }
+  }
+  function resetSelectedTool() {
+    selectedTool = null;
+    document.body.classList.remove(...Object.values(toolCursorClasses));
+    toolsPanel.querySelectorAll('.tool').forEach(t => {
+      t.style.borderColor = 'transparent';
+      t.setAttribute('aria-pressed', 'false');
+    });
+  }
+  function selectTool(tool) {
+    if (selectedTool === tool) {
+      resetSelectedTool();
+    } else {
+      selectedTool = tool;
+      document.body.classList.remove(...Object.values(toolCursorClasses));
+      let cursorClass = toolCursorClasses[tool];
+      if(cursorClass) document.body.classList.add(cursorClass);
+      toolsPanel.querySelectorAll('.tool').forEach(t => {
+        if (t.dataset.tool === tool) {
+          t.style.borderColor = '#2e7d32';
+          t.setAttribute('aria-pressed', 'true');
+        }
+        else {
+          t.style.borderColor = 'transparent';
+          t.setAttribute('aria-pressed', 'false');
+        }
+      });
+      pakBurungSay(`Alat dipilih: ${toolToName(tool)}`);
+    }
+  }
+  function toolToName(tool) {
+    return {
+      spider: 'Laba-laba',
+      bird: 'Burung pemakan serangga',
+      stickyTrap: 'Perangkap daun lengket',
+      flower: 'Bunga pengusir hama',
+      pesticide: 'Pestisida kimia',
+      plasticNet: 'Jaring plastik',
+      chase: 'Mengusir',
+      spray: 'Menyemprot'
+    }[tool] || tool;
+  }
+  function addScore(amount) {
+    score += amount;
+    if (score < 0) score = 0;
+    updateScoreDisplay();
+  }
+  function showCatchAnimation(bugElem, bugData, success=true) {
+    bugElem.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+    bugElem.style.transform = 'scale(0)';
+    bugElem.style.opacity = '0.3';
+  }
+
+  // --- GAME LOGIC ---
+  function spawnBug() {
+    if (!gameRunning) return;
+    const bugData = BUGS_DATA[Math.floor(Math.random() * BUGS_DATA.length)];
+    const bugElem = document.createElement('div');
+    bugElem.classList.add('bug');
+    bugElem.setAttribute('aria-label', `${bugData.id}, hama`);
+    bugElem.dataset.bugId = bugData.id;
+    bugElem.dataset.isHama = bugData.isHama;
+    bugElem.dataset.killed = 'false';
+    bugElem.style.top = '-32px';
+
+    // Random side: true = left side, false = right side
+    const fromLeft = Math.random() < 0.5;
+    bugElem.style.left = fromLeft ? '-40px' : (bugArea.clientWidth + 40) + 'px';
+
+    bugElem.innerHTML = `<div>${bugData.emoji}</div><div class="bug-label">
+      <strong>${capitalize(bugData.id)}</strong><br>
+      ${bugData.isHama ? 'Basmi: ' + bugData.naturalControl : 'Bukan hama, biarkan!'}
+    </div>`;
+
+    bugElem.addEventListener('click', function(e) {
+      if (!gameRunning) return;
+      if (bugElem.dataset.killed === 'true') return;
+      if (!selectedTool) {
+        pakBurungSay('Pilih alat alami dulu sebelum mengusir hama!');
+        return;
+      }
+      const bugId = bugElem.dataset.bugId;
+      const bugDataObj = BUGS_DATA.find(b => b.id === bugId);
+      if (!bugDataObj) return;
+      if (selectedTool === 'pesticide' || selectedTool === 'plasticNet' || selectedTool === 'chase' || selectedTool === 'spray') {
+        pakBurungSay('Jangan gunakan cara kasar seperti pestisida atau jaring plastik ya!');
+        return;
+      }
+      if (bugId === 'kupu') {
+        if (['flower','spider','bird','stickyTrap'].includes(selectedTool)) {
+          pakBurungSay('Kupu-kupu bukan hama. Biarkan mereka terbang bebas ya!');
+          return;
+        }
+      }
+      if (bugDataObj.goodTool.includes(selectedTool)) {
+        pakBurungSay(`Bagus! Kamu menggunakan ${toolToName(selectedTool)} untuk mengalihkan ${bugDataObj.emoji}.`);
+        bugElem.dataset.killed = 'true';
+        addScore(10);
+        showCatchAnimation(bugElem, bugDataObj, true);
+        setTimeout(() => {
+          removeBug(bugElem);
+        }, 600);
+      } else if (bugDataObj.badTool.includes(selectedTool)) {
+        pakBurungSay(`Wah, alat ${toolToName(selectedTool)} tidak ramah lingkungan untuk ${bugDataObj.emoji}, hindari ya.`);
+        addScore(-5);
+        showCatchAnimation(bugElem, bugDataObj, false);
+        setTimeout(() => {
+          removeBug(bugElem);
+        }, 600);
+      } else {
+        pakBurungSay(`Alat ${toolToName(selectedTool)} kurang tepat untuk ${bugDataObj.emoji}. Coba alat lain.`);
+        addScore(-3);
+      }
+    });
+
+    bugArea.appendChild(bugElem);
+    bugsOnScreen.push(bugElem);
+
+    animateBugToTree(bugElem, bugData, fromLeft);
+  }
+
+  // Percepat pergerakan hama: durasi animasi jadi 4200ms (dari 7000ms)
+  function animateBugToTree(bugElem, bugData, fromLeft) {
+    const treeAreaWidth = bugArea.clientWidth;
+    const treeAreaHeight = bugArea.clientHeight;
+    let startX = fromLeft ? -40 : treeAreaWidth + 40;
+    let startY = -32;
+    let targetX = (treeAreaWidth / 2) - 15;
+    let targetY = treeAreaHeight - 60;
+    let duration = 4200; // Lebih cepat dari sebelumnya
+    let startTime = null;
+
+    function animate(time){
+      if(!startTime) startTime = time;
+      let elapsed = time - startTime;
+      let progress = Math.min(elapsed / duration, 1);
+      let currentX = startX + (targetX - startX) * progress;
+      let currentY = startY + (targetY - startY) * progress;
+      bugElem.style.left = currentX + 'px';
+      bugElem.style.top = currentY + 'px';
+      if(progress < 1 && bugElem.dataset.killed !== 'true'){
+        requestAnimationFrame(animate);
+      } else if (progress >= 1 && bugElem.dataset.killed !== 'true') {
+        bugReachedPohon(bugElem, bugData);
+        removeBug(bugElem);
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+
+  function startGame() {
+    if (gameRunning) return;
+    gameRunning = true;
+    score = 0;
+    timeLeft = GAME_DURATION;
+    treeStage = 1;
+    resetHealth();
+    updateTreeStage();
+    updateScoreDisplay();
+    updateTimerDisplay();
+    messageBox.textContent = '';
+    startBtn.disabled = true;
+    eduBox.textContent = 'Fakta Alam: Beberapa hama yang mengganggu pohon antara lain ulat 🐛, belalang 🦗, dan wereng 🪱.';
+    bugsOnScreen.forEach(bug => {
+      if (bug.parentNode) bug.parentNode.removeChild(bug);
+    });
+    bugsOnScreen = [];
+    gameOverOverlay.style.display = 'none';
+    quizModal.style.display = 'none';
+    treeDeadOverlay.style.display = 'none';
+    resetSelectedTool();
+    introOverlay.style.display = 'none';
+    gameContainer.classList.add('active');
+
+    gameTimer = setInterval(() => {
+      timeLeft--;
+      updateTimerDisplay();
+      if (timeLeft <= 0) {
+        endGame();
+      }
+    }, 1000);
+    spawnTimer = setInterval(spawnBug, BUG_SPAWN_INTERVAL);
+  }
+
+  function endGame() {
+    gameRunning = false;
+    clearInterval(gameTimer);
+    clearInterval(spawnTimer);
+    startBtn.disabled = false;
+    resetSelectedTool();
+    messageBox.textContent = '';
+    pakBurungSay(`Permainan selesai! Skormu ${score}. Terima kasih sudah menjaga pohon! 🌿`);
+    eduBox.innerHTML = `<b>Reward:</b> Stiker Digital “Penjaga Pohon” dan Bibit Virtual bisa kamu dapatkan!<br>“Terima kasih! Kamu hebat menjaga alam dengan bijak.” - Ibu Pohon`;
+    finalScoreText.textContent = `Skor Akhirmu: ${score}`;
+    gameOverOverlay.style.display = 'flex';
+  }
+
+  // --- EVENT LISTENERS ---
+  toolsPanel.querySelectorAll('.tool').forEach(toolElem => {
+    toolElem.addEventListener('click', () => {
+      selectTool(toolElem.dataset.tool);
+    });
+    toolElem.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectTool(toolElem.dataset.tool);
+      }
+    });
+  });
+  startBtn.addEventListener('click', startGame);
+  nextMissionBtn.addEventListener('click', () => {
+    window.location.href = 'quest3.html';
+  });
+
+  retryBtn.addEventListener('click', () => {
+    window.location.reload();
+  });
+
+  function showQuiz() {
+    quizModal.style.display = 'block';
+  }
+  function hideQuiz() {
+    quizModal.style.display = 'none';
+  }
+  closeQuizBtn.addEventListener('click', () => {
+    hideQuiz();
+  });
+
+  quizAnswers.forEach(answerEl => {
+    answerEl.addEventListener('click', () => {
+      const correct = answerEl.dataset.correct === 'true';
+      if (correct) {
+        answerEl.style.background = '#a8e6cf';
+        pakBurungSay('Betul! Itu hama yang perlu dijaga supaya pohon tumbuh dengan sehat.');
+      } else {
+        answerEl.style.background = '#f8b4b2';
+        pakBurungSay('Tidak ya, kupu-kupu bukan hama, mereka teman alam.');
+      }
+      quizAnswers.forEach(ans => ans.style.pointerEvents = 'none');
+    });
+    answerEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        answerEl.click();
+      }
+    });
+  });
+
+  // Inisialisasi health bar di awal
+  updateHealthBar();
+
+  // --- Prevent scroll on mobile (extra) ---
+  window.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+  }, { passive: false });
+  window.addEventListener('scroll', function() {
+    window.scrollTo(0,0);
+  });
+})();
+</script>
+</body>
+</html>
