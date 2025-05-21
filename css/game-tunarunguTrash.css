@@ -1,0 +1,311 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    background: url("../assets/Background/oceanGIF.gif") no-repeat center
+      center/cover;
+    margin: 0;
+    overflow: hidden;
+    z-index: 1;
+    position: relative;
+  }
+  .game-info {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    max-width: 800px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 10px;
+  }
+  .game-container {
+    position: relative;
+    width: 100vw;
+    height: 80vh;
+    background: url("../assets/Background/oceanGIF.gif") no-repeat center
+      center/cover;
+    overflow: hidden;
+  }
+  .trash-can {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200px;
+    height: 200px;
+    background: url("../assets/sprite/TrashCan.png") no-repeat center
+      center/contain;
+    margin-top: 250px;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    border-radius: 50%;
+    filter: drop-shadow(0 0 15px rgba(76, 175, 80, 0.8));
+  }
+
+  .trash-can.highlight {
+    transform: translateY(-50%) scale(1.1);
+    animation: glow 1s infinite alternate;
+  }
+
+  @keyframes glow {
+    from {
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8))
+        drop-shadow(0 0 20px rgba(76, 175, 80, 0.8));
+    }
+    to {
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 1))
+        drop-shadow(0 0 30px rgba(76, 175, 80, 1));
+    }
+  }
+
+  .trash {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    cursor: grab;
+    filter: drop-shadow(3px 3px 5px rgba(0, 0, 0, 0.5));
+    transition: all 0.3s ease;
+    animation: floatAndWobble 4s infinite;
+  }
+
+  @keyframes floatAndWobble {
+    0% {
+      transform: translateY(0) rotate(0deg);
+    }
+    25% {
+      transform: translateY(5px) rotate(2deg);
+    }
+    50% {
+      transform: translateY(0) rotate(0deg);
+    }
+    75% {
+      transform: translateY(-5px) rotate(-2deg);
+    }
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+  }
+
+  .trash.dragging {
+    transform: scale(1.2);
+    z-index: 1000;
+  }
+
+  .fade-out {
+    opacity: 0;
+    transform: scale(0) rotate(360deg);
+    transition: all 0.5s ease-out;
+  }
+
+  .collection-animation {
+    position: absolute;
+    pointer-events: none;
+    animation: collect 0.5s ease-out forwards;
+    z-index: 1001;
+  }
+
+  @keyframes collect {
+    0% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0) rotate(360deg);
+      opacity: 0;
+    }
+  }
+
+  .score-popup {
+    position: absolute;
+    color: #4caf50;
+    font-weight: bold;
+    font-size: 24px;
+    pointer-events: none;
+    animation: scoreFloat 1s ease-out forwards;
+  }
+
+  @keyframes scoreFloat {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-50px);
+      opacity: 0;
+    }
+  }
+
+  .popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background: rgba(0, 0, 0, 25);
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    display: none;
+    border-radius: 10px;
+    transition: all 0.3s ease-in-out;
+    color: white;
+  }
+  .popup.show {
+    display: block;
+    transform: translate(-50%, -50%) scale(1);
+    animation: popupAppear 0.5s ease-out;
+  }
+
+  @keyframes popupAppear {
+    0% {
+      transform: translate(-50%, -50%) scale(0.8);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+  }
+
+  .popup button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+
+  .popup button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+  }
+
+  #lyra-image {
+    position: fixed;
+    bottom: -120px;
+    right: 10px;
+    width: 250px;
+    height: auto;
+    z-index: 9999;
+    transform: scaleX(-1);
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);  /* Darker, more opaque black */
+    z-index: 9998;
+    display: block;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+
+  .start-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.9);  /* Almost black background */
+    padding: 30px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.7);
+    color: white;  /* White text for better contrast */
+    text-align: center;
+    border-radius: 15px;
+    z-index: 99999;
+    display: block;
+    border: 1px solid rgba(0, 0, 0, 0.8);  /* Subtle border */
+    backdrop-filter: blur(5px);  /* Adds a slight blur effect */
+  }
+
+.start-popup h2 {
+  color: #4caf50;  /* Green title */
+  margin-bottom: 15px;
+}
+
+.start-popup p {
+  margin-bottom: 15px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);  /* Slightly dimmed text */
+}
+
+.start-popup button {
+  margin-top: 20px;
+  padding: 12px 24px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.start-popup button:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);  /* Green glow on hover */
+}
+
+  .video-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: 10000;
+    display: none;
+  }
+
+  .game-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9997;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  #fade {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    z-index: 999999; /* agar berada di atas konten */
+    opacity: 1;
+    animation: fadeOut 2s ease-in-out forwards;
+  }
+
+  #content {
+    padding: 20px;
+    z-index: 1;
+  }
+
+  @keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }

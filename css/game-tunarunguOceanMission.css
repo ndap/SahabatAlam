@@ -1,0 +1,99 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-image: url("../assets/Background/LingkunganAirBG.jpg");
+    background-size: cover;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: left;
+}
+.container {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.671);
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.493);
+    max-width: 800px;
+    margin: 20px;
+    transition: transform 0.3s ease;
+}
+.container:hover {
+    transform: scale(1.05);
+}
+.info {
+    max-width: 400px;
+    margin-left: 20px;
+}
+.info h2 {
+    font-size: 28px;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #ff5100a4;
+    padding-bottom: 5px;
+}
+.info p {
+    font-size: 18px;
+    line-height: 1.6;
+    overflow: hidden;
+    white-space: normal; /* Perbaikan: agar teks tidak terpotong */
+    display: inline-block;
+}
+.character-image {
+    max-width: 200px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+.character-image:hover {
+    transform: scale(1.1);
+}
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        text-align: center;
+    }
+    .info {
+        margin-left: 0;
+        margin-top: 20px;
+    }
+}
+
+#next-button {
+    display: none;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #ff5100a4;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: block;
+    text-align: center;
+}
+
+#next-button:hover {
+    background-color: #ff5100;
+    transform: scale(1.05);
+}
+
+#fadeTransition {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw; height: 100vh;
+            background: #eaf6e1;
+            z-index: 9999;
+            opacity: 1;
+            pointer-events: all;
+            transition: opacity 0.7s cubic-bezier(.4,2,.6,1);
+        }
+        #fadeTransition.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
