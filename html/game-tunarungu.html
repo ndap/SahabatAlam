@@ -1,480 +1,1358 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Game Edukasi Tunarungu - Lindungi Pohon</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      min-height: 100vh;
-      background: url('../assets/Background/TunarunguBG.jpg') no-repeat center center fixed;
-      background-size: cover;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      position: relative;
-      overflow: hidden;
-    }
-    .welcome-modal {
-      position: fixed;
-      left: 50%; top: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(255,255,255,0.97);
-      border-radius: 24px;
-      box-shadow: 0 8px 40px 0 rgba(60,120,60,0.18);
-      padding: 40px 32px 32px 32px;
-      z-index: 1001;
-      text-align: center;
-      min-width: 340px;
-      max-width: 90vw;
-      animation: popin 0.7s cubic-bezier(.23,1.12,.62,1.01);
-    }
-    @keyframes popin {
-      0% { transform: translate(-50%,-60%) scale(0.7); opacity: 0; }
-      100% { transform: translate(-50%,-50%) scale(1); opacity: 1; }
-    }
-    .welcome-modal h1 {
-      font-size: 2.1rem;
-      color: #388e3c;
-      margin-bottom: 10px;
-      letter-spacing: 1px;
-      font-weight: 700;
-    }
-    .welcome-modal .emoji {
-      font-size: 2.5rem;
-      margin-bottom: 8px;
-      display: block;
-      animation: bounce 1.2s infinite alternate;
-    }
-    @keyframes bounce {
-      0% { transform: translateY(0);}
-      100% { transform: translateY(-10px);}
-    }
-    .welcome-modal p {
-      font-size: 1.15rem;
-      color: #333;
-      margin-bottom: 22px;
-      line-height: 1.6;
-    }
-    .welcome-modal button {
-      padding: 10px 36px;
-      font-size: 1.1rem;
-      border-radius: 10px;
-      border: none;
-      background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 2px 12px rgba(56,143,60,0.13);
-      transition: background 0.2s, transform 0.15s;
-      letter-spacing: 1px;
-    }
-    .welcome-modal button:hover {
-      background: linear-gradient(90deg, #388e3c 0%, #43e97b 100%);
-      transform: scale(1.04);
-    }
-    .howto-modal {
-      position: fixed;
-      left: 50%; top: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 8px 40px 0 rgba(60,120,60,0.18);
-      padding: 32px 28px 24px 28px;
-      z-index: 1002;
-      text-align: left;
-      min-width: 300px;
-      max-width: 92vw;
-      display: none;
-      animation: popin 0.6s;
-    }
-    .howto-modal h2 {
-      margin-top: 0;
-      color: #31710f;
-      font-size: 1.3rem;
-      margin-bottom: 10px;
-    }
-    .howto-modal ol {
-      margin: 0 0 10px 18px;
-      padding: 0;
-      font-size: 1.07rem;
-    }
-    .howto-modal li {
-      margin-bottom: 7px;
-    }
-    .howto-modal .howto-tips {
-      margin-top: 10px;
-      font-size: 0.98rem;
-      color: #226d1b;
-    }
-    .howto-modal button {
-      margin-top: 18px;
-      background: #43a047;
-      color: #fff;
-      font-weight: 700;
-      font-size: 1rem;
-      padding: 10px 28px;
-      border-radius: 18px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 18px #2e7d32a8;
-      transition: background-color 0.3s;
-      outline: none;
-      display: inline-block;
-    }
-    .howto-modal button:hover {
-      background: #357a38;
-    }
-    .game-area {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .scoreboard {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background: rgba(255,255,255,0.9);
-      border-radius: 12px;
-      padding: 10px 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      z-index: 10;
-      min-width: 180px;
-    }
-    .scoreboard h1 {
-      font-size: 18px;
-      color: #2d5d2c;
-      margin: 0 0 5px 0;
-    }
-    .scoreboard p {
-      margin: 2px 0;
-      font-size: 14px;
-      color: #333;
-    }
-    .ground {
-      position: absolute;
-      left: 50%;
-      top: 72%;
-      transform: translate(-50%, 0);
-      width: 300px;
-      height: 60px;
-      background: #8d6e63;
-      border-radius: 50% 50% 60% 60%;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-      cursor: pointer;
-      z-index: 2;
-      transition: background 0.2s;
-    }
-    .ground.clicked {
-      background: #6d4c41;
-      cursor: default;
-    }
-    .tree-stage {
-      position: absolute;
-      left: 50%;
-      top: 72%;
-      transform: translate(-50%, -100%);
-      opacity: 0;
-      z-index: 3;
-      transition: opacity 0.5s;
-      pointer-events: none;
-    }
-    .tree-stage.active {
-      opacity: 1;
-    }
-    .tree-stage.stage-0 { width: 40px; height: 40px; }
-    .tree-stage.stage-1 { width: 60px; height: 60px; }
-    .tree-stage.stage-2 { width: 90px; height: 110px; }
-    .tree-stage.stage-3 { width: 120px; height: 180px; }
-    .progress-bar-bg {
-      position: absolute;
-      left: 50%;
-      top: 66%;
-      transform: translate(-50%, 0);
-      width: 220px;
-      height: 18px;
-      background: #eee;
-      border-radius: 10px;
-      overflow: hidden;
-      z-index: 5;
-      border: 2px solid #bbb;
-      display: none;
-    }
-    .progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, #81c784, #388e3c);
-      width: 0%;
-      transition: width 0.2s;
-    }
-    .info-text {
-      position: absolute;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      color: #333;
-      max-width: 400px;
-      font-size: 15px;
-      background: rgba(255,255,255,0.8);
-      border-radius: 8px;
-      padding: 8px 16px;
-      z-index: 100;
-    }
-    .hidden { display: none !important; }
-    .result-modal {
-      position: fixed;
-      left: 50%; top: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-      padding: 32px 40px;
-      z-index: 999;
-      text-align: center;
-      min-width: 300px;
-      display: none;
-    }
-    .result-modal h2 {
-      margin: 0 0 12px 0;
-      color: #2d5d2c;
-    }
-    .result-modal button {
-      margin-top: 18px;
-      padding: 8px 24px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: none;
-      background: #388e3c;
-      color: #fff;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: inline-block;
-    }
-    .result-modal button:hover {
-      background: #2e7031;
-    }
-    .result-modal a#result-next {
-      margin-top: 18px;
-      padding: 10px 36px 10px 20px;
-      font-size: 1.15rem;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
-      color: #fff;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 2px 12px rgba(56,143,60,0.13);
-      transition: background 0.2s, transform 0.15s;
-      letter-spacing: 1px;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-    }
-    .result-modal a#result-next:hover {
-      background: linear-gradient(90deg, #388e3c 0%, #43e97b 100%);
-      transform: scale(1.05);
-      color: #fff;
-    }
-    .result-modal a#result-next img {
-      height: 28px;
-      width: 28px;
-      vertical-align: middle;
-      margin-right: 6px;
-    }
-    @media (max-width: 600px) {
-      .ground { width: 180px; height: 38px; }
-      .tree-stage.stage-0 { width: 26px; height: 26px; }
-      .tree-stage.stage-1 { width: 38px; height: 38px; }
-      .tree-stage.stage-2 { width: 60px; height: 70px; }
-      .tree-stage.stage-3 { width: 80px; height: 120px; }
-      .progress-bar-bg { width: 120px; height: 12px; }
-      .howto-modal { padding: 18px 8px 14px 8px; }
-    }
-  </style>
-</head>
-<body>
-  <!-- Welcome Modal -->
-  <div class="welcome-modal" id="welcome-modal">
-    <span class="emoji">👋🌳</span>
-    <h1>Selamat Datang di Misi Pertama!</h1>
-    <p>
-      Di <b>Game Sahabat Alam</b>, kamu akan <b>menanam pohon</b> dan <b>menjaga pohon</b>.<br><br>
-      Yuk mulai petualanganmu, klik tombol di bawah ini untuk lanjut ke permainan!
-    </p>
-    <button id="show-howto-btn" style="margin-bottom:10px;background:#e0f2e9;color:#31710f;font-weight:600;font-size:1rem;padding:8px 22px;border-radius:16px;border:none;cursor:pointer;">Lihat Cara Main</button>
-    <br>
-    <button id="start-btn">Mulai Misi</button>
-  </div>
-  <!-- Petunjuk Modal -->
-  <div class="howto-modal" id="howto-modal">
-    <h2>Cara Bermain 🌱</h2>
-    <ol>
-      <li>Klik tanah di tengah layar untuk menanam bibit pohon.</li>
-      <li>Tunggu beberapa detik, pohon akan tumbuh secara bertahap.</li>
-      <li>Setelah pohon tumbuh besar, kamu bisa lanjut ke misi berikutnya.</li>
-    </ol>
-    <div class="howto-tips">
-      <b>Tips:</b> Sabar menunggu pohon tumbuh. Tidak ada hama di misi ini, fokus menanam saja!
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Edukasi Tunarungu - Lindungi Pohon</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        min-height: 100vh;
+        background: url("../assets/Background/TunarunguBG.jpg") no-repeat center
+          center fixed;
+        background-size: cover;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Sun and Moon Animation */
+      .sky-objects {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        pointer-events: none;
+      }
+      .sun {
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        width: 80px;
+        height: 80px;
+        background: #ffd700;
+        border-radius: 50%;
+        box-shadow: 0 0 40px #ffd700;
+      }
+      .moon {
+        position: absolute;
+        top: 40px;
+        right: 40px;
+        width: 70px;
+        height: 70px;
+        background: #f5f5f5;
+        border-radius: 50%;
+        box-shadow: 0 0 20px #f5f5f5;
+        opacity: 0;
+      }
+
+      /* Clouds Animation */
+      .cloud {
+        position: absolute;
+        width: 120px;
+        height: 60px;
+        background: white;
+        border-radius: 50px;
+        filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.1));
+        animation: float-cloud 60s linear infinite;
+        opacity: 0.9;
+      }
+      .cloud:before,
+      .cloud:after {
+        content: "";
+        position: absolute;
+        top: -15px;
+        background: white;
+        border-radius: 50%;
+      }
+      .cloud:before {
+        width: 50px;
+        height: 50px;
+        left: 20px;
+      }
+      .cloud:after {
+        width: 60px;
+        height: 60px;
+        right: 20px;
+      }
+      .cloud-1 {
+        top: 60px;
+        left: -130px;
+        transform: scale(0.8);
+      }
+      .cloud-2 {
+        top: 140px;
+        left: -200px;
+        transform: scale(1.2);
+        animation-delay: -20s;
+      }
+      @keyframes float-cloud {
+        0% {
+          left: -150px;
+        }
+        100% {
+          left: calc(100% + 150px);
+        }
+      }
+
+      /* Modals */
+      .welcome-modal {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.97);
+        border-radius: 24px;
+        box-shadow: 0 8px 40px 0 rgba(60, 120, 60, 0.18);
+        padding: 40px 32px 32px 32px;
+        z-index: 1001;
+        text-align: center;
+        min-width: 340px;
+        max-width: 90vw;
+        animation: popin 0.7s cubic-bezier(0.23, 1.12, 0.62, 1.01);
+      }
+      @keyframes popin {
+        0% {
+          transform: translate(-50%, -60%) scale(0.7);
+          opacity: 0;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+        }
+      }
+      .welcome-modal h1 {
+        font-size: 2.1rem;
+        color: #388e3c;
+        margin-bottom: 10px;
+        letter-spacing: 1px;
+        font-weight: 700;
+      }
+      .welcome-modal .emoji {
+        font-size: 2.5rem;
+        margin-bottom: 8px;
+        display: block;
+        animation: bounce 1.2s infinite alternate;
+      }
+      @keyframes bounce {
+        0% {
+          transform: translateY(0);
+        }
+        100% {
+          transform: translateY(-10px);
+        }
+      }
+      .welcome-modal p {
+        font-size: 1.15rem;
+        color: #333;
+        margin-bottom: 22px;
+        line-height: 1.6;
+      }
+      .welcome-modal button {
+        padding: 10px 36px;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 12px rgba(56, 143, 60, 0.13);
+        transition: background 0.2s, transform 0.15s;
+        letter-spacing: 1px;
+      }
+      .welcome-modal button:hover {
+        background: linear-gradient(90deg, #388e3c 0%, #43e97b 100%);
+        transform: scale(1.04);
+      }
+      .howto-modal {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 8px 40px 0 rgba(60, 120, 60, 0.18);
+        padding: 32px 28px 24px 28px;
+        z-index: 1002;
+        text-align: left;
+        min-width: 300px;
+        max-width: 92vw;
+        display: none;
+        animation: popin 0.6s;
+      }
+      .howto-modal h2 {
+        margin-top: 0;
+        color: #31710f;
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+      }
+      .howto-modal ol {
+        margin: 0 0 10px 18px;
+        padding: 0;
+        font-size: 1.07rem;
+      }
+      .howto-modal li {
+        margin-bottom: 7px;
+      }
+      .howto-modal .howto-tips {
+        margin-top: 10px;
+        font-size: 0.98rem;
+        color: #226d1b;
+      }
+      .howto-modal button {
+        margin-top: 18px;
+        background: #43a047;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 10px 28px;
+        border-radius: 18px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 18px #2e7d32a8;
+        transition: background-color 0.3s;
+        outline: none;
+        display: inline-block;
+      }
+      .howto-modal button:hover {
+        background: #357a38;
+      }
+
+      /* Game Area */
+      .game-area {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* Scoreboard */
+      .scoreboard {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 10px 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        min-width: 180px;
+      }
+      .scoreboard h1 {
+        font-size: 18px;
+        color: #2d5d2c;
+        margin: 0 0 5px 0;
+      }
+      .scoreboard p {
+        margin: 2px 0;
+        font-size: 14px;
+        color: #333;
+      }
+
+      /* Ground and Tree */
+      .garden-container {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 30%;
+        overflow: hidden;
+        z-index: 1;
+        display: flex;
+        justify-content: center; /* center child horizontally */
+        align-items: flex-end; /* align child to bottom */
+      }
+      .ground-base {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 70%;
+        background: #8b4513;
+        z-index: 1;
+      }
+      .soil-surface {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 70%;
+        height: 40px;
+        background: #a1887f;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        z-index: 2;
+      }
+      .ground {
+        position: absolute;
+        left: 50%; /* Pusatkan anchor ke tengah parent */
+        bottom: 100px; /* Jarak dari bawah */
+        transform: translate(-50%, 0); /* Geser anchor ke tengah elemen */
+        width: 300px;
+        height: 80px;
+        background: #8d6e63;
+        border-radius: 50% 50% 0 0;
+        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        z-index: 3;
+        transition: background 0.2s;
+      }
+      .ground:after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 20px;
+        bottom: -15px;
+        left: 0;
+        background: #6d4c41;
+        border-radius: 50% 50% 0 0;
+        z-index: -1;
+      }
+      .ground.clicked {
+        background: #6d4c41;
+        cursor: default;
+      }
+      .tree-container {
+        position: absolute;
+        left: 50%;
+        bottom: 80px; /* atau sama dengan tinggi .ground */
+        transform: translate(-50%, 0);
+        width: 160px;
+        height: 250px;
+        z-index: 999;
+        pointer-events: all;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        overflow: visible;
+      }
+      .tree-stage {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translate(-50%, 0);
+        opacity: 0;
+        transition: opacity 0.5s;
+        pointer-events: none;
+        transform-origin: bottom center;
+        z-index: 1000;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+      .tree-stage.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      /* Tools */
+      .tool-container {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        z-index: 10;
+      }
+      .tool {
+        width: 60px;
+        height: 60px;
+        background: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .tool:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      }
+      .tool img {
+        width: 65%;
+        height: 65%;
+        object-fit: contain;
+      }
+      .tool.active {
+        background: #e0f7fa;
+        border: 2px solid #4fc3f7;
+      }
+
+      /* Soil animation for planting */
+      @keyframes soil-dig {
+        0% {
+          transform: translate(-50%, 0) scale(1);
+        }
+        50% {
+          transform: translate(-50%, 0) scale(1.05, 0.95);
+        }
+        100% {
+          transform: translate(-50%, 0) scale(1);
+        }
+      }
+
+      /* Soil moisture levels */
+      .ground.dry {
+        background: #b3937a;
+      }
+
+      .ground.watered {
+        background: #6d4c41;
+        animation: soil-moisture 0.5s ease;
+      }
+
+      @keyframes soil-moisture {
+        0% {
+          background: #b3937a;
+        }
+        100% {
+          background: #6d4c41;
+        }
+      }
+
+      /* Planting hole */
+      .planting-hole {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translate(-50%, 0);
+        width: 40px;
+        height: 20px;
+        background: #3e2723;
+        border-radius: 50% 50% 0 0;
+        z-index: 3;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .planting-hole.visible {
+        opacity: 1;
+      }
+
+      /* Water Animation */
+      .water-drop {
+        position: absolute;
+        width: 20px;
+        height: 30px;
+        background: #4fc3f7;
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        z-index: 4;
+        opacity: 0.8;
+        animation: fall 1s linear forwards;
+      }
+      @keyframes fall {
+        0% {
+          transform: translateY(0);
+          opacity: 0.8;
+        }
+        90% {
+          opacity: 0.8;
+        }
+        100% {
+          transform: translateY(200px);
+          opacity: 0;
+        }
+      }
+
+      /* Progress Bar */
+      .progress-container {
+        position: absolute;
+        left: 50%;
+        bottom: 35%;
+        transform: translate(-50%, 0);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        z-index: 10;
+        display: none;
+      }
+      .progress-label {
+        font-size: 14px;
+        color: #333;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 4px 12px;
+        border-radius: 10px;
+      }
+      .progress-bar-bg {
+        width: 220px;
+        height: 18px;
+        background: #eee;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 2px solid #bbb;
+      }
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #81c784, #388e3c);
+        width: 0%;
+        transition: width 0.2s;
+      }
+
+      /* Info Text */
+      .info-text {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        color: #333;
+        max-width: 400px;
+        font-size: 15px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        padding: 8px 16px;
+        z-index: 100;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Result Modal */
+      .result-modal {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        padding: 32px 40px;
+        z-index: 999;
+        text-align: center;
+        min-width: 300px;
+        display: none;
+        animation: popin 0.7s;
+      }
+      .result-modal h2 {
+        margin: 0 0 12px 0;
+        color: #2d5d2c;
+      }
+      .result-modal p {
+        margin-bottom: 20px;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      .result-modal .achievement {
+        background: #f1f8e9;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 15px 0;
+        border: 1px dashed #aed581;
+      }
+      .result-modal .achievement h3 {
+        margin: 0 0 5px 0;
+        color: #558b2f;
+        font-size: 16px;
+      }
+      .result-modal .achievement p {
+        margin: 0;
+        font-size: 14px;
+      }
+      .result-modal button {
+        margin-top: 18px;
+        padding: 8px 24px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: none;
+        background: #388e3c;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: inline-block;
+      }
+      .result-modal button:hover {
+        background: #2e7031;
+      }
+      .result-modal a#result-next {
+        margin-top: 18px;
+        padding: 10px 36px 10px 20px;
+        font-size: 1.15rem;
+        border-radius: 12px;
+        border: none;
+        background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 2px 12px rgba(56, 143, 60, 0.13);
+        transition: background 0.2s, transform 0.15s;
+        letter-spacing: 1px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+      }
+      .result-modal a#result-next:hover {
+        background: linear-gradient(90deg, #388e3c 0%, #43e97b 100%);
+        transform: scale(1.05);
+        color: #fff;
+      }
+      .result-modal a#result-next img {
+        height: 28px;
+        width: 28px;
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+
+      /* Facts Popup */
+      .fact-popup {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        max-width: 250px;
+        z-index: 50;
+        transform: translateY(-20px);
+        opacity: 0;
+        transition: transform 0.3s, opacity 0.3s;
+        pointer-events: none;
+      }
+      .fact-popup.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .fact-popup h3 {
+        margin: 0 0 8px 0;
+        color: #2d5d2c;
+        font-size: 16px;
+      }
+      .fact-popup p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      /* Utility Classes */
+      .hidden {
+        display: none !important;
+      }
+
+      /* Responsive Styles */
+      @media (max-width: 600px) {
+        .ground {
+          width: 180px;
+          height: 60px;
+        }
+        .tree-stage.stage-0 {
+          width: 26px;
+          height: 26px;
+        }
+        .tree-stage.stage-1 {
+          width: 38px;
+          height: 38px;
+        }
+        .tree-stage.stage-2 {
+          width: 60px;
+          height: 70px;
+        }
+        .tree-stage.stage-3 {
+          width: 80px;
+          height: 120px;
+        }
+        .progress-container .progress-bar-bg {
+          width: 150px;
+          height: 12px;
+        }
+        .howto-modal {
+          padding: 18px 16px 14px 16px;
+        }
+        .tool {
+          width: 50px;
+          height: 50px;
+        }
+        .fact-popup {
+          max-width: 200px;
+          right: 10px;
+        }
+        .soil-surface {
+          height: 25px;
+        }
+      }
+
+      .bug {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        background-image: url("../assets/Sprite/insect1.png"); /* Ganti dengan nama file gambar hama Anda */
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        cursor: pointer;
+        z-index: 1002;
+      }
+
+      /* Plant Hint */
+      .plant-hint {
+        position: absolute;
+        left: 43%;
+        bottom: 210px; /* sedikit di atas tanah */
+        transform: translateX(-50%);
+        z-index: 20;
+        pointer-events: none;
+        animation: hint-pop 1s infinite alternate;
+      }
+      @keyframes hint-pop {
+        0% {
+          transform: translateX(-50%) translateY(0);
+        }
+        100% {
+          transform: translateX(-50%) translateY(10px);
+        }
+      }
+      .hint-box {
+        background: rgba(255, 255, 255, 0.95);
+        border: 2px dashed #43a047;
+        border-radius: 12px;
+        padding: 10px 18px 18px 18px;
+        text-align: center;
+        font-size: 1.1rem;
+        color: #31710f;
+        font-weight: 600;
+        box-shadow: 0 2px 12px rgba(56, 143, 60, 0.13);
+        position: relative;
+        display: inline-block;
+      }
+      .arrow-down {
+        width: 0;
+        height: 0;
+        border-left: 18px solid transparent;
+        border-right: 18px solid transparent;
+        border-top: 18px solid #43a047;
+        margin: 0 auto;
+        position: absolute;
+        left: 50%;
+        bottom: -18px;
+        transform: translateX(-50%);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Background Elements -->
+    <div class="sky-objects">
+      <div class="sun" id="sun"></div>
+      <div class="moon" id="moon"></div>
+      <div class="cloud cloud-1"></div>
+      <div class="cloud cloud-2"></div>
     </div>
-    <button id="close-howto-btn">Tutup</button>
-  </div>
-  <div class="game-area">
-    <div class="scoreboard">
-      <h1>🌱 Tanam Pohon</h1>
-      <p id="level-text">Level 1: Tanam & Tumbuhkan Pohon</p>
-      <p id="timer-text">Waktu: <span id="timer">0</span> detik</p>
+
+    <!-- Welcome Modal -->
+    <div class="welcome-modal" id="welcome-modal">
+      <span class="emoji">👋🌳</span>
+      <h1>Selamat Datang di Misi Pohon!</h1>
+      <p>
+        Di <b>Game Sahabat Alam</b>, kamu akan <b>menanam pohon</b>,
+        <b>menyiram pohon</b>, dan
+        <b>melindungi pohon dari hama</b>.<br /><br />
+        Yuk mulai petualanganmu menjadi pahlawan lingkungan!
+      </p>
+      <button
+        id="show-howto-btn"
+        style="
+          margin-bottom: 10px;
+          background: #e0f2e9;
+          color: #31710f;
+          font-weight: 600;
+          font-size: 1rem;
+          padding: 8px 22px;
+          border-radius: 16px;
+          border: none;
+          cursor: pointer;
+        "
+      >
+        Lihat Cara Main
+      </button>
+      <br />
+      <button id="start-btn">Mulai Petualangan</button>
     </div>
-    <div class="ground" id="ground"></div>
-    <!-- Animasi pohon bertahap -->
-    <img src="../assets/Sprite/pohon1.png" class="tree-stage stage-0 active" id="tree-stage-0" draggable="false" />
-    <img src="../assets/Sprite/pohon2.png" class="tree-stage stage-1" id="tree-stage-1" draggable="false" />
-    <img src="../assets/Sprite/pohon3.png" class="tree-stage stage-2" id="tree-stage-2" draggable="false" />
-    <img src="../assets/Sprite/pohon gede (2).png" class="tree-stage stage-3" id="tree-stage-3" draggable="false" />
-    <div class="progress-bar-bg" id="progress-bar-bg">
-      <div class="progress-bar" id="progress-bar"></div>
+
+    <!-- Tutorial Modal -->
+    <div class="howto-modal" id="howto-modal">
+      <h2>Cara Bermain 🌱</h2>
+      <ol>
+        <li>Klik tanah di tengah layar untuk menanam bibit pohon.</li>
+        <li>
+          Gunakan alat penyiram (ikon air) untuk menyiram pohon saat kuning
+          muncul.
+        </li>
+        <li>
+          Gunakan alat pengusir hama (ikon semprotan) saat ada serangga yang
+          mendekat.
+        </li>
+        <li>
+          Pertahankan pohon agar tumbuh sehat melalui 4 tahap pertumbuhan.
+        </li>
+        <li>Perhatikan siang dan malam! Pohon perlu sinar matahari dan air.</li>
+      </ol>
+      <div class="howto-tips">
+        <b>Tips:</b> Perhatikan warna tanah. Jika tanah kering (kuning), segera
+        siram!
+      </div>
+      <button id="close-howto-btn">Tutup</button>
     </div>
-    <div class="info-text" id="info-text">
-      Klik tanah untuk menanam pohon di tengah.<br>
-      Setelah pohon tumbuh, kamu bisa lanjut ke misi berikutnya!
+
+    <!-- Game Area -->
+    <div class="game-area">
+      <!-- Scoreboard -->
+      <div class="scoreboard">
+        <h1>🌱 Tanam & Jaga Pohon</h1>
+        <p id="level-text">Level 1: Tanam & Tumbuhkan Pohon</p>
+        <p id="day-text">Hari: <span id="day-count">1</span></p>
+        <p id="timer-text">Waktu: <span id="timer">0</span> detik</p>
+        <p id="health-text">Kesehatan: <span id="health">100</span>%</p>
+      </div>
+
+      <!-- Garden Container -->
+      <div class="garden-container">
+        <div class="ground-base"></div>
+        <div class="soil-surface"></div>
+        <div class="ground" id="ground"></div>
+        <div class="planting-hole" id="planting-hole"></div>
+        <div class="tree-container">
+          <img
+            src="../assets/Sprite/pohon1.png"
+            class="tree-stage stage-0"
+            id="tree-stage-0"
+            draggable="false"
+            style="object-fit: contain"
+          />
+          <img
+            src="../assets/Sprite/pohon3.png"
+            class="tree-stage stage-1"
+            id="tree-stage-1"
+            draggable="false"
+          />
+          <img
+            src="../assets/Sprite/pohon6.png"
+            class="tree-stage stage-2"
+            id="tree-stage-2"
+            draggable="false"
+          />
+          <img
+            src="../assets/Sprite/pohon8.png"
+            class="tree-stage stage-3"
+            id="tree-stage-3"
+            draggable="false"
+          />
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-container" id="progress-container">
+        <div class="progress-label" id="progress-label">Pertumbuhan Pohon</div>
+        <div class="progress-bar-bg" id="progress-bar-bg">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+      </div>
+
+      <!-- Tools -->
+      <div class="tool-container" id="tools">
+        <div class="tool" id="water-tool" title="Siram Pohon">
+          <img src="../assets/Sprite/water.png" alt="Siram" id="water-icon" />
+        </div>
+        <div class="tool" id="bug-spray-tool" title="Usir Hama">
+          <img
+            src="../assets/Sprite/spray.png"
+            alt="Usir Hama"
+            id="spray-icon"
+          />
+        </div>
+      </div>
+
+      <!-- Info Text -->
+      <div class="info-text" id="info-text">
+        Klik tanah untuk menanam pohon. Jaga agar pohon tetap sehat!
+      </div>
+
+      <!-- Fact Popup -->
+      <div class="fact-popup" id="fact-popup">
+        <h3>Tahukah Kamu?</h3>
+        <p id="fact-text">
+          Satu pohon besar dapat menghasilkan oksigen untuk 4 orang setiap hari!
+        </p>
+      </div>
+
+      <!-- Result Modal -->
+      <div class="result-modal" id="result-modal">
+        <h2 id="result-title"></h2>
+        <p id="result-msg"></p>
+        <div class="achievement" id="achievement">
+          <h3>🏆 Pencapaian Baru!</h3>
+          <p>Kamu mendapatkan lencana "Perawat Pohon Handal"</p>
+        </div>
+        <a id="result-next" href="tunarunguquest2.html">
+          <img src="../assets/Sprite/pohon8.png" alt="Next" /> Lanjut Misi
+          Berikutnya
+        </a>
+      </div>
+
+      <!-- Plant Hint -->
+      <div class="plant-hint" id="plant-hint">
+        <div class="hint-box">
+          <span>Tap di sini untuk menanam pohon</span>
+          <div class="arrow-down"></div>
+        </div>
+      </div>
     </div>
-    <div class="result-modal" id="result-modal">
-      <h2 id="result-title"></h2>
-      <p id="result-msg"></p>
-      <a id="result-next" href="../html/tunarunguquest2.html" style="display:none">
-        Lanjut Misi Berikutnya
-      </a>
-      <button id="result-retry" onclick="location.reload()" style="display:none">Main Lagi</button>
-    </div>
-  </div>
-  <script>
-    // Welcome Modal Logic
-    const welcomeModal = document.getElementById('welcome-modal');
-    const startBtn = document.getElementById('start-btn');
-    const showHowtoBtn = document.getElementById('show-howto-btn');
-    const howtoModal = document.getElementById('howto-modal');
-    const closeHowtoBtn = document.getElementById('close-howto-btn');
-    const gameArea = document.querySelector('.game-area');
-    gameArea.style.filter = "blur(2.5px)";
-    gameArea.style.pointerEvents = "none";
 
-    showHowtoBtn.addEventListener('click', function() {
-      howtoModal.style.display = "block";
-    });
-    closeHowtoBtn.addEventListener('click', function() {
-      howtoModal.style.display = "none";
-    });
+    <script>
+      // DOM Elements
+      const welcomeModal = document.getElementById("welcome-modal");
+      const startBtn = document.getElementById("start-btn");
+      const showHowtoBtn = document.getElementById("show-howto-btn");
+      const howtoModal = document.getElementById("howto-modal");
+      const closeHowtoBtn = document.getElementById("close-howto-btn");
+      const gameArea = document.querySelector(".game-area");
+      const ground = document.getElementById("ground");
+      const plantingHole = document.getElementById("planting-hole");
+      const tools = document.getElementById("tools");
+      const waterTool = document.getElementById("water-tool");
+      const bugSprayTool = document.getElementById("bug-spray-tool");
+      const progressContainer = document.getElementById("progress-container");
+      const progressBar = document.getElementById("progress-bar");
+      const progressLabel = document.getElementById("progress-label");
+      const infoText = document.getElementById("info-text");
+      const timerText = document.getElementById("timer");
+      const dayCount = document.getElementById("day-count");
+      const healthText = document.getElementById("health");
+      const levelText = document.getElementById("level-text");
+      const resultModal = document.getElementById("result-modal");
+      const resultTitle = document.getElementById("result-title");
+      const resultMsg = document.getElementById("result-msg");
+      const resultNext = document.getElementById("result-next");
+      const resultRetry = document.getElementById("result-retry");
+      const factPopup = document.getElementById("fact-popup");
+      const factText = document.getElementById("fact-text");
+      const sun = document.getElementById("sun");
+      const moon = document.getElementById("moon");
 
-    startBtn.addEventListener('click', function() {
-      welcomeModal.style.display = "none";
-      howtoModal.style.display = "none";
-      gameArea.style.filter = "none";
-      gameArea.style.pointerEvents = "auto";
-    });
+      // Tree stages elements
+      const treeStagesImg = [
+        document.getElementById("tree-stage-0"),
+        document.getElementById("tree-stage-1"),
+        document.getElementById("tree-stage-2"),
+        document.getElementById("tree-stage-3"),
+      ];
 
-    // --- Game State ---
-    let level = 1;
-    let treePlanted = false;
-    let treeGrown = false;
-    let growTime = 15; // detik
-    let growInterval, timerInterval;
-    let timeLeft = 0;
-    let growStage = 0;
-    const growStages = [
-      { id: "tree-stage-0", duration: 4 },
-      { id: "tree-stage-1", duration: 4 },
-      { id: "tree-stage-2", duration: 3 },
-      { id: "tree-stage-3", duration: 4 }
-    ];
+      // Game State
+      let gameStarted = false;
+      let treePlanted = false;
+      let treeGrown = false;
+      let growTime = 60; // 2 minutes total
+      let timeElapsed = 0;
+      let dayCounter = 1;
+      let growStage = 0;
+      let currentTool = null;
+      let needsWater = false;
+      let healthValue = 100;
+      let wateringNeeded = false;
+      let bugPresent = false;
+      let factShown = false;
+      let isNight = false;
+      let dayNightCycle = 15; // 30 seconds per cycle
 
-    // --- DOM ---
-    const ground = document.getElementById('ground');
-    const treeStagesImg = [
-      document.getElementById('tree-stage-0'),
-      document.getElementById('tree-stage-1'),
-      document.getElementById('tree-stage-2'),
-      document.getElementById('tree-stage-3')
-    ];
-    const progressBarBg = document.getElementById('progress-bar-bg');
-    const progressBar = document.getElementById('progress-bar');
-    const infoText = document.getElementById('info-text');
-    const timerText = document.getElementById('timer');
-    const levelText = document.getElementById('level-text');
-    const resultModal = document.getElementById('result-modal');
-    const resultTitle = document.getElementById('result-title');
-    const resultMsg = document.getElementById('result-msg');
-    const resultNext = document.getElementById('result-next');
-    const resultRetry = document.getElementById('result-retry');
+      // Tree growth stages configuration
+      const growStages = [
+        { id: "tree-stage-0", duration: 15, name: "Bibit" },
+        { id: "tree-stage-1", duration: 15, name: "Tunas" },
+        { id: "tree-stage-2", duration: 15, name: "Pohon Kecil" },
+        { id: "tree-stage-3", duration: 15, name: "Pohon Besar" },
+      ];
 
-    // --- Assets ---
-    const treeGrowSfx = new Audio('https://www.soundjay.com/button/beep-01a.wav');
-    const winSfx = new Audio('https://www.soundjay.com/button/beep-06.wav');
+      // Educational facts
+      const treeFacts = [
+        "Satu pohon besar dapat menghasilkan oksigen untuk 4 orang setiap hari!",
+        "Pohon membantu menyerap air hujan dan mencegah banjir.",
+        "Akar pohon membantu menjaga tanah agar tidak longsor.",
+        "Pohon adalah rumah bagi banyak hewan seperti burung dan tupai.",
+        "Pohon membantu udara menjadi lebih sejuk saat cuaca panas.",
+        "Daun pohon menangkap debu dan polusi udara.",
+      ];
 
-    // --- Plant Tree ---
-    ground.addEventListener('click', function() {
-      if (treePlanted) return;
-      treePlanted = true;
-      ground.classList.add('clicked');
-      infoText.textContent = "Pohon sedang tumbuh... Tunggu 15 detik!";
-      progressBarBg.style.display = 'block';
-      timeLeft = growTime;
-      timerText.textContent = timeLeft;
-      levelText.textContent = "Level 1: Pohon Tumbuh";
-      growStage = 0;
-      showTreeStage(0);
-      growProgress();
-      treeGrowSfx.play();
-    });
+      // Initial Game Setup
+      gameArea.style.filter = "blur(2.5px)";
+      gameArea.style.pointerEvents = "none";
+      tools.style.display = "none";
 
-    function showTreeStage(stageIdx) {
-      treeStagesImg.forEach((img, idx) => {
-        if (idx === stageIdx) img.classList.add('active');
-        else img.classList.remove('active');
+      // Initialize Button Event Listeners
+      showHowtoBtn.addEventListener("click", function () {
+        howtoModal.style.display = "block";
       });
-    }
 
-    function growProgress() {
-      let elapsed = 0;
-      let stageElapsed = 0;
-      let stageIdx = 0;
-      let stageTime = growStages[stageIdx].duration;
-      progressBar.style.width = "0%";
-      timerInterval = setInterval(() => {
-        elapsed++;
-        stageElapsed++;
-        timeLeft = growTime - elapsed;
-        timerText.textContent = timeLeft;
-        progressBar.style.width = ((elapsed / growTime) * 100) + "%";
-        if (stageElapsed >= stageTime && stageIdx < growStages.length - 1) {
-          stageIdx++;
-          stageElapsed = 0;
-          stageTime = growStages[stageIdx].duration;
-          showTreeStage(stageIdx);
-          treeGrowSfx.currentTime = 0; treeGrowSfx.play();
-        }
-        if (elapsed >= growTime) {
-          clearInterval(timerInterval);
-          showTreeStage(3);
-          progressBarBg.style.display = 'none';
-          treeGrown = true;
-          finishPlantScene();
-        }
-      }, 1000);
-    }
+      closeHowtoBtn.addEventListener("click", function () {
+        howtoModal.style.display = "none";
+      });
 
-    function finishPlantScene() {
-      winSfx.play();
-      resultTitle.textContent = "Pohonmu Sudah Tumbuh!";
-      resultMsg.textContent = "Selamat, kamu berhasil menanam dan menumbuhkan pohon. Yuk lanjut ke misi berikutnya!";
-      resultNext.style.display = "inline-flex";
-      resultRetry.style.display = "inline-block";
-      resultModal.style.display = "block";
-    }
-  </script>
-</body>
+      startBtn.addEventListener("click", function () {
+        welcomeModal.style.display = "none";
+        howtoModal.style.display = "none";
+        gameArea.style.filter = "none";
+        gameArea.style.pointerEvents = "auto";
+        gameStarted = true;
+        startDayNightCycle();
+      });
+
+      // Ground Click (Plant Tree)
+      ground.addEventListener("click", function () {
+        if (treePlanted || !gameStarted) return;
+
+        // Sembunyikan petunjuk
+        document.getElementById("plant-hint").style.display = "none";
+
+        // Animate soil for digging
+        ground.style.animation = "soil-dig 0.5s ease";
+        setTimeout(() => {
+          ground.style.animation = "";
+        }, 500);
+
+        // Show planting hole
+        plantingHole.classList.add("visible");
+
+        // Wait a moment before showing the tree
+        setTimeout(() => {
+          treePlanted = true;
+          ground.classList.add("clicked");
+          infoText.textContent = "Pohon mulai tumbuh! Jaga agar selalu sehat.";
+          progressContainer.style.display = "flex";
+          tools.style.display = "flex";
+          levelText.textContent = "Level 1: Pohon Sedang Tumbuh";
+          growStage = 0;
+          showTreeStage(0);
+          startGrowth();
+          showRandomFact();
+        }, 600);
+      });
+
+      // Tool Selection
+      waterTool.addEventListener("click", function () {
+        if (!treePlanted) return;
+
+        currentTool = "water";
+        waterTool.classList.add("active");
+        bugSprayTool.classList.remove("active");
+        infoText.textContent = "Alat siram dipilih. Klik pohon untuk menyiram.";
+      });
+
+      bugSprayTool.addEventListener("click", function () {
+        if (!treePlanted) return;
+
+        currentTool = "spray";
+        bugSprayTool.classList.add("active");
+        waterTool.classList.remove("active");
+        infoText.textContent =
+          "Alat pengusir hama dipilih. Klik hama untuk mengusirnya.";
+      });
+
+      // Tree Interaction
+      for (let i = 0; i < treeStagesImg.length; i++) {
+        treeStagesImg[i].addEventListener("click", function (e) {
+          e.stopPropagation();
+          if (currentTool === "water" && wateringNeeded) {
+            waterTree();
+          }
+        });
+      }
+
+      // Functions
+      function startGrowth() {
+        timeElapsed = 0;
+        updateProgress();
+
+        // Start the growth timer
+        const gameInterval = setInterval(() => {
+          timeElapsed++;
+          timerText.textContent = timeElapsed;
+
+          // Update progress bar
+          updateProgress();
+
+          // Check for tree stage changes
+          checkGrowthStage();
+
+          // Randomly trigger watering need (except during night)
+          if (
+            !isNight &&
+            !wateringNeeded &&
+            treePlanted &&
+            !treeGrown &&
+            Math.random() < 0.02
+          ) {
+            triggerWateringNeed();
+          }
+
+          // Randomly spawn bugs (more likely at night)
+          const bugChance = isNight ? 0.03 : 0.01;
+          if (
+            !bugPresent &&
+            treePlanted &&
+            !treeGrown &&
+            Math.random() < bugChance
+          ) {
+            spawnBug();
+          }
+
+          // Reduce health if tree needs water
+          if (wateringNeeded) {
+            reduceHealth(0.5);
+          }
+
+          // Game over if health reaches 0
+          if (healthValue <= 0) {
+            clearInterval(gameInterval);
+            gameOver(false);
+          }
+
+          // Win condition
+          if (growStage >= growStages.length - 1 && timeElapsed >= growTime) {
+            clearInterval(gameInterval);
+            treeGrown = true;
+            gameOver(true);
+          }
+        }, 1000);
+      }
+
+      function startDayNightCycle() {
+        setInterval(() => {
+          isNight = !isNight;
+          dayCounter = isNight ? dayCounter : dayCounter + 1;
+          dayCount.textContent = dayCounter;
+
+          if (isNight) {
+            // Gambar background malam
+            document.body.style.background =
+              "url('../assets/Background/tunarunguMalam.jpg') no-repeat center center fixed";
+            document.body.style.backgroundSize = "cover";
+            sun.style.opacity = "0";
+            moon.style.opacity = "1";
+            infoText.textContent =
+              "Malam hari. Pohon istirahat dan tumbuh perlahan.";
+            showRandomFact();
+          } else {
+            // Gambar background siang
+            document.body.style.background =
+              "url('../assets/Background/TunarunguBG.jpg') no-repeat center center fixed";
+            document.body.style.backgroundSize = "cover";
+            sun.style.opacity = "1";
+            moon.style.opacity = "0";
+            infoText.textContent =
+              "Siang hari. Pohon tumbuh lebih cepat dengan bantuan matahari.";
+          }
+        }, dayNightCycle * 1000);
+      }
+
+      function showTreeStage(stageIdx) {
+        treeStagesImg.forEach((img, idx) => {
+          if (idx === stageIdx) img.classList.add("active");
+          else img.classList.remove("active");
+        });
+
+        // Hide planting hole after first stage
+        if (stageIdx > 0) {
+          plantingHole.classList.remove("visible");
+          progressLabel.textContent = `Tahap: ${growStages[stageIdx].name}`;
+          showRandomFact();
+        }
+      }
+
+      function checkGrowthStage() {
+        const currentStageTime = growStages
+          .slice(0, growStage + 1)
+          .reduce((acc, stage) => acc + stage.duration, 0);
+        if (
+          timeElapsed >= currentStageTime &&
+          growStage < growStages.length - 1
+        ) {
+          growStage++;
+          showTreeStage(growStage);
+
+          // Show achievement message
+          infoText.textContent = `Pohon tumbuh ke tahap ${growStages[growStage].name}!`;
+
+          // Reset watering state
+          wateringNeeded = false;
+          ground.style.background = "#8d6e63";
+        }
+      }
+
+      function updateProgress() {
+        const progressPercentage = Math.min(
+          (timeElapsed / growTime) * 100,
+          100
+        );
+        progressBar.style.width = `${progressPercentage}%`;
+      }
+
+      function triggerWateringNeed() {
+        if (!treePlanted || treeGrown) return;
+
+        wateringNeeded = true;
+        ground.classList.add("dry");
+        ground.classList.remove("watered");
+        infoText.textContent = "Pohon butuh air! Gunakan alat siram sekarang!";
+      }
+
+      function waterTree() {
+        if (!wateringNeeded) return;
+
+        // Create water animation
+        for (let i = 0; i < 5; i++) {
+          const drop = document.createElement("div");
+          drop.className = "water-drop";
+          drop.style.left = `${Math.random() * 60 + 45}%`;
+          drop.style.top = `${Math.random() * 10 + 40}%`;
+          gameArea.appendChild(drop);
+
+          // Remove water drop after animation
+          setTimeout(() => {
+            drop.remove();
+          }, 1000);
+        }
+
+        // Reset watering state
+        wateringNeeded = false;
+        ground.classList.remove("dry");
+        ground.classList.add("watered");
+
+        // Increase health
+        increaseHealth(10);
+
+        infoText.textContent = "Bagus! Pohon sudah disiram dan sehat kembali.";
+
+        // Remove watered class after a while
+        setTimeout(() => {
+          ground.classList.remove("watered");
+        }, 2000);
+      }
+
+      function spawnBug() {
+        if (!treePlanted || treeGrown) return;
+
+        bugPresent = true;
+
+        // Create bug element
+        const bug = document.createElement("div");
+        bug.className = "bug";
+
+        // Position near the tree based on tree stage
+        const treeBase = document.getElementById(`tree-stage-${growStage}`);
+        const treeRect = treeBase.getBoundingClientRect();
+
+        // Random position near the tree
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 100 + Math.random() * 50;
+        const x = Math.cos(angle) * distance + window.innerWidth / 2;
+        const y =
+          Math.sin(angle) * distance + treeRect.top + treeRect.height / 2;
+
+        bug.style.left = `${x}px`;
+        bug.style.top = `${y}px`;
+
+        gameArea.appendChild(bug);
+
+        // Bug movement animation
+        let targetX = window.innerWidth / 2;
+        let targetY = treeRect.top + treeRect.height / 2;
+        const speed = 0.5;
+
+        const moveBug = setInterval(() => {
+          const bugRect = bug.getBoundingClientRect();
+          const dx = targetX - (bugRect.left + bugRect.width / 2);
+          const dy = targetY - (bugRect.top + bugRect.height / 2);
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 5) {
+            // Bug reached tree, damage it
+            reduceHealth(5);
+            clearInterval(moveBug);
+            if (bug.parentNode) bug.remove();
+            bugPresent = false;
+            infoText.textContent =
+              "Hama merusak pohon! Kesehatan pohon berkurang.";
+          } else {
+            // Move bug toward tree
+            bug.style.left = `${bugRect.left + (dx * speed) / dist}px`;
+            bug.style.top = `${bugRect.top + (dy * speed) / dist}px`;
+          }
+        }, 50);
+
+        // Bug click event (spray)
+        bug.addEventListener("click", () => {
+          if (currentTool === "spray") {
+            clearInterval(moveBug);
+            bug.remove();
+            bugPresent = false;
+            infoText.textContent = "Kamu berhasil mengusir hama!";
+          }
+        });
+
+        infoText.textContent =
+          "Awas! Ada hama mendekati pohon. Gunakan semprotan!";
+      }
+
+      function increaseHealth(amount) {
+        healthValue = Math.min(healthValue + amount, 100);
+        healthText.textContent = healthValue;
+      }
+
+      function reduceHealth(amount) {
+        healthValue = Math.max(healthValue - amount, 0);
+        healthText.textContent = Math.floor(healthValue);
+
+        // Visual feedback when health low
+        if (healthValue < 30) {
+          healthText.style.color = "red";
+        } else if (healthValue < 50) {
+          healthText.style.color = "orange";
+        } else {
+          healthText.style.color = "black";
+        }
+      }
+
+      function showRandomFact() {
+        if (factShown) return;
+
+        factShown = true;
+        const randomFact =
+          treeFacts[Math.floor(Math.random() * treeFacts.length)];
+        factText.textContent = randomFact;
+        factPopup.classList.add("show");
+
+        setTimeout(() => {
+          factPopup.classList.remove("show");
+          factShown = false;
+        }, 5000);
+      }
+
+      function gameOver(isWin) {
+        if (isWin) {
+          resultTitle.textContent = "Pohonmu Sudah Tumbuh Besar!";
+          resultMsg.textContent = `Selamat! Kamu berhasil menanam dan merawat pohon hingga tumbuh besar dalam ${dayCounter} hari dengan kesehatan ${Math.floor(
+            healthValue
+          )}%.`;
+          resultNext.style.display = "inline-flex";
+          document.getElementById("achievement").style.display = "block";
+        } else {
+          resultTitle.textContent = "Pohonmu Tidak Sehat";
+          resultMsg.textContent =
+            "Sayang sekali pohonmu tidak bisa tumbuh dengan baik. Mungkin perlu lebih sering disiram atau dilindungi dari hama.";
+          resultNext.style.display = "none";
+          document.getElementById("achievement").style.display = "none";
+        }
+
+        resultRetry.style.display = "inline-block";
+        resultModal.style.display = "block";
+      }
+    </script>
+  </body>
 </html>
