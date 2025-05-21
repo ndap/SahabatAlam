@@ -835,7 +835,20 @@
     gap: 15px;
     z-index: 60;
   }
-  
+  #fadeTransition {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    background: #eaf6e1;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.7s cubic-bezier(.4,2,.6,1);
+  }
+  #fadeTransition.active {
+    opacity: 1;
+    pointer-events: all;
+  }
   .powerup {
     width: 50px;
     height: 50px;
@@ -1058,9 +1071,13 @@
       <p id="achievementText" style="font-weight:600;color:var(--primary);margin-bottom:25px;">Penghargaan Diperoleh: Pembela Pohon!</p>
       
       <button id="nextMissionBtn" class="primary-button" aria-label="Lanjut ke Misi Berikutnya">Lanjut ke Misi Berikutnya</button>
+    <div id="fadeTransition"></div>
+
     </div>
   </div>
 </div>
+
+<div id="fadeTransition"></div>
 
 <script>
 (() => {
@@ -2126,9 +2143,10 @@
   });
   
   nextMissionBtn.addEventListener('click', () => {
-    // Redirect to next mission
-    // In a real implementation, you would use:
-    window.location.href = 'game-tunarunguOceanMission.html';
+    fadeTransition.classList.add('active');
+    setTimeout(() => {
+      window.location.href = 'game-tunarunguOceanMission.html';
+    }, 700);
   });
 
   retryBtn.addEventListener('click', () => {
@@ -2191,6 +2209,31 @@
     }
   `;
   document.head.appendChild(style);
+
+  // --- FADING TRANSITION LOGIC ---
+  const fadeTransition = document.getElementById('fadeTransition');
+  // Pastikan elemen sudah ada
+  if (fadeTransition) {
+    // Fade out saat halaman selesai dimuat
+    window.addEventListener('DOMContentLoaded', () => {
+      fadeTransition.classList.add('active');
+      setTimeout(() => {
+        fadeTransition.classList.remove('active');
+      }, 700);
+    });
+  }
+
+  // Fade in saat klik next mission
+  nextMissionBtn.addEventListener('click', () => {
+    if (fadeTransition) {
+      fadeTransition.classList.add('active');
+      setTimeout(() => {
+        window.location.href = 'game-tunarunguOceanMission.html';
+      }, 700);
+    } else {
+      window.location.href = 'game-tunarunguOceanMission.html';
+    }
+  });
 })();
 </script>
 </body>

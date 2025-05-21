@@ -7,9 +7,8 @@
     <link rel="stylesheet" href="../css/seleneMission.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-</head>
-<style>
-    body {
+    <style>
+        body {
     margin: 0;
     padding: 0;
     font-family: 'Arial', sans-serif;
@@ -94,8 +93,24 @@
     transform: scale(1.05);
 }
 
-</style>
+#fadeTransition {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw; height: 100vh;
+            background: #eaf6e1;
+            z-index: 9999;
+            opacity: 1;
+            pointer-events: all;
+            transition: opacity 0.7s cubic-bezier(.4,2,.6,1);
+        }
+        #fadeTransition.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
 <body>
+    <div id="fadeTransition"></div>
     <div class="container">
         <img alt="Character image" class="character-image" src="../assets/sprite/KeiraConfused.png"/>
         <div class="info">
@@ -106,6 +121,15 @@
     </div>
 
     <script>
+        // Fade out on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const fade = document.getElementById('fadeTransition');
+            setTimeout(() => {
+                fade.classList.add('hide');
+            }, 400); // Sedikit delay agar efek lebih terasa
+        });
+
+        // Teks mengetik
         const text =
   "Hai teman-teman, ayo kita berpetualang ke laut! Eh, tunggu dulu! Kenapa banyak banget sampah di laut? Gimana kalau kita bantu bersihin lautnya? Yuk, bersama-sama kita bersihkan laut dari sampah supaya ikan-ikan bisa hidup dengan nyaman!";
 const typingSpeed = 30; // Kecepatan mengetik (ms per karakter)
@@ -124,7 +148,6 @@ function typeText() {
 window.onload = () => {
   typeText();
 };
-
     </script>
 </body>
 </html>
